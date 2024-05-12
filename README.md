@@ -38,7 +38,7 @@ Trabalho realizado por:
 
 * ``Reprodutibilidade``: Facilita o compartilhamento e a execução do código em diferentes máquinas.
 
-* ``Gerenciamento de versões``: Permite instalar e manter diferentes versões de bibliotecas para cada projeto.
+* ``Gestão de versões``: Permite instalar e manter diferentes versões de bibliotecas para cada projeto.
 
 * ``Leveza``: Facilita o compartilhamento do código entre diferentes máquinas.
 
