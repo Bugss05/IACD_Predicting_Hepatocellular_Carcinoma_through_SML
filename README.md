@@ -293,10 +293,6 @@ jupyter notebook
       <td>3.7</td>
     </tr>
     <tr>
-      <th>Package</th>
-      <th>Version</th>
-    </tr>
-    <tr>
       <td>ImageHash</td>
       <td>4.3.1</td>
     </tr>
