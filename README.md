@@ -26,7 +26,7 @@ Trabalho realizado por:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Este programa trabalha com um intrepetador `Python` e usa um `venv` ou "virtual enviroment"  de forma a dispor um jupyter nootebook. O respetivo terá um ficheiro [data.ipybn](data.ipybn) que, passo a passo, mostrará o nosso processo lógico e como atacamos o problema. <br>
 
- <mark>A seguinte parte ainda não foi finalizada e não foi decidida ainda a sua implementação.</mark><br>
+``A seguinte parte ainda não foi finalizada e não foi decidida ainda a sua implementação.``<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Foi realizado um ficheiro de documentação para explicar e formularizar o problema, visto que alguns detalhes são desvalorizados no notebook ou até não referidos no programa em si.<br>
 
 &nbsp;&nbsp;&nbsp;&nbsp;A escolha da utilização de um `venv` derivou dos seguintes fatores:
@@ -104,7 +104,6 @@ jupyter notebook
 #### Estas são todas as bibliotecas utilizadas:
 
 
-<div style="display: inline-block; vertical-align: top;">
 <table>
   <thead>
     <tr>
@@ -293,18 +292,10 @@ jupyter notebook
       <td>idna</td>
       <td>3.7</td>
     </tr>
-  </tbody>
-</table>
-</div>
-<div style="display: inline-block; vertical-align: top;">
-<table>
-  <thead>
     <tr>
       <th>Package</th>
       <th>Version</th>
     </tr>
-  </thead>
-  <tbody>
     <tr>
       <td>ImageHash</td>
       <td>4.3.1</td>
@@ -486,18 +477,6 @@ jupyter notebook
       <td>nltk</td>
       <td>3.8.1</td>
     </tr>
-  </tbody>
-</table>
-</div>
-<div style="display: inline-block; vertical-align: top;">
-<table>
-  <thead>
-    <tr>
-      <th>Package</th>
-      <th>Version</th>
-    </tr>
-  </thead>
-  <tbody>
       <td>notebook</td>
       <td>7.1.3</td>
     </tr>
@@ -677,18 +656,6 @@ jupyter notebook
       <td>rfc3339-validator</td>
       <td>0.1.4</td>
     </tr>
-  </tbody>
-</table>
-</div>
-<div style="display: inline-block; vertical-align: top;">
-<table>
-  <thead>
-    <tr>
-      <th>Package</th>
-      <th>Version</th>
-    </tr>
-  </thead>
-  <tbody>
     <tr>
       <td>rfc3986-validator</td>
       <td>0.1.1</td>
@@ -839,6 +806,4 @@ jupyter notebook
     </tr>
   </tbody>
 </table>
-</div>
-
  
