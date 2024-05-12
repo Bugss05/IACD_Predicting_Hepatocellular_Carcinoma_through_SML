@@ -1,4 +1,4 @@
-# <font size="65">Predicting Hepatocellular Carcinoma through supervised Machine learning</font>
+# <font size="65">Predicting Hepatocellular Carcinoma through Supervised Machine learning</font>
 
 Trabalho realizado por:
 
