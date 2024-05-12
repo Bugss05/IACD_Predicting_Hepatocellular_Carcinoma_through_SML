@@ -1,4 +1,4 @@
-# <font size="65">Data exploration and enrichment for supervised classification</font>
+# <font size="65">Predicting Hepatocellular Carcinoma through supervised Machine learning</font>
 
 Trabalho realizado por:
 
