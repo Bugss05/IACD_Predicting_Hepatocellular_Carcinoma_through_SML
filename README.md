@@ -17,19 +17,19 @@ Trabalho realizado por:
 
 ## Projeto  
 
-&nbsp;&nbsp;&nbsp;&nbsp;Neste projeto, o propósito é abordar um caso real do conjunto de dados do Carcinoma Hepatocelular (HCC). O referido conjunto de dados HCC foi coletado no Centro Hospitalar e Universitário de Coimbra (CHUC) em Portugal, e consiste em dados clínicos reais de pacientes diagnosticados com HCC.<br>
+Neste projeto, o propósito é abordar um caso real do conjunto de dados do Carcinoma Hepatocelular (HCC). O referido conjunto de dados HCC foi coletado no Centro Hospitalar e Universitário de Coimbra (CHUC) em Portugal, e consiste em dados clínicos reais de pacientes diagnosticados com HCC.<br>
 
- &nbsp;&nbsp;&nbsp;&nbsp;O objetivo primordial deste projeto é desenvolver um algoritmo SML (Supervised Machine Learning) capaz de determinar a possibilidade de sobrevivencia dos pacientes após 1 ano do diagnóstico (por exemplo, "sobrevive" ou "falece"). <br>
+O objetivo primordial deste projeto é desenvolver um algoritmo SML (Supervised Machine Learning) capaz de determinar a possibilidade de sobrevivencia dos pacientes após 1 ano do diagnóstico (por exemplo, "sobrevive" ou "falece"). <br>
 
 
  ## Como opera o programa
 
-&nbsp;&nbsp;&nbsp;&nbsp;Este programa trabalha com um intrepetador `Python` e usa um `venv` ou "virtual enviroment"  de forma a dispor um jupyter nootebook. O respetivo terá um ficheiro [data.ipybn](data.ipybn) que, passo a passo, mostrará o nosso processo lógico e como atacamos o problema. <br>
+Este programa trabalha com um intrepetador `Python` e usa um `venv` ou "virtual enviroment"  de forma a dispor um jupyter nootebook. O respetivo terá um ficheiro [data.ipybn](data.ipybn) que, passo a passo, mostrará o nosso processo lógico e como atacamos o problema. <br>
 
 ``A seguinte parte ainda não foi finalizada e não foi decidida ainda a sua implementação.``<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Foi realizado um ficheiro de documentação para explicar e formularizar o problema, visto que alguns detalhes são desvalorizados no notebook ou até não referidos no programa em si.<br>
+Foi realizado um ficheiro de documentação para explicar e formularizar o problema, visto que alguns detalhes são desvalorizados no notebook ou até não referidos no programa em si.<br>
 
-&nbsp;&nbsp;&nbsp;&nbsp;A escolha da utilização de um `venv` derivou dos seguintes fatores:
+A escolha da utilização de um `venv` derivou dos seguintes fatores:
 
 * ``Bibliotecas extensas``: para facilitar o acesso e redução de tempo perdido em instalação de bibliotecas 
 * ``Isolamento de dependências``: Evita conflitos entre projetos e garante compatibilidade.
