@@ -26,9 +26,6 @@ O objetivo primordial deste projeto é desenvolver um algoritmo SML (Supervised 
 
 Este programa trabalha com um intrepetador `Python` e usa um `venv` ou "virtual enviroment"  de forma a dispor um jupyter nootebook. O respetivo terá um ficheiro [data.ipybn](data.ipybn) que, passo a passo, mostrará o nosso processo lógico e como atacamos o problema. <br>
 
-``A seguinte parte ainda não foi finalizada e não foi decidida ainda a sua implementação.``<br>
-Foi realizado um ficheiro de documentação para explicar e formularizar o problema, visto que alguns detalhes são desvalorizados no notebook ou até não referidos no programa em si.<br>
-
 A escolha da utilização de um `venv` derivou dos seguintes fatores:
 
 * ``Bibliotecas extensas``: para facilitar o acesso e redução de tempo perdido em instalação de bibliotecas 
