@@ -17,52 +17,76 @@ Trabalho realizado por:
 
 ## Projeto  
 
-Neste projeto, o propósito é abordar um caso real do conjunto de dados do Carcinoma Hepatocelular (HCC). O referido conjunto de dados HCC foi coletado no Centro Hospitalar e Universitário de Coimbra (CHUC) em Portugal, e consiste em dados clínicos reais de pacientes diagnosticados com HCC.<br>
+O objetivo deste projeto é abordar um caso real do conjunto de dados, representativo de pacientes que sofrem de Carcinoma Hepatocelular (HCC), mais comumente conhecido como cancro do fígado. O conjunto mencionado de dados HCC ([hcc_dataset.csv](hcc_dataset.csv)) foi recolhido no Centro Hospitalar e Universitário de Coimbra (CHUC) em Portugal, e contém dados clínicos reais de pacientes diagnosticados com HCC.<br>
 
-O objetivo primordial deste projeto é desenvolver um algoritmo SML (Supervised Machine Learning) capaz de determinar a possibilidade de sobrevivencia dos pacientes após 1 ano do diagnóstico (por exemplo, "sobrevive" ou "falece"). <br>
+Pretende-se, portanto, desenvolver vários algoritmos SML (Supervised Machine Learning), capazes de determinar a probabilidade de sobrevivência dos pacientes após 1 ano do diagnóstico (aspeto identificado na coluna `"Class"` com `"Lives"` ou `"Dies"`). <br>
 
 
  ## Como opera o programa
 
-Este programa trabalha com um intrepetador `Python` e usa um `venv` ou "virtual enviroment"  de forma a dispor um jupyter nootebook. O respetivo terá um ficheiro [data.ipybn](data.ipybn) que, passo a passo, mostrará o nosso processo lógico e como atacamos o problema. <br>
+Este programa trabalha com um intrepetador `Python` e usa um ambiente virtual `conda`  de forma a facilitar a instalação das dependências necessárias para a utilização do Jupyter Notebook. O notebook mencionado está guardado no ficheiro de nome [data.ipybn](data.ipybn) que, passo a passo, mostrará a progressão do projeto, bem como o nosso processo lógico e a forma como decidimos atacar o problema. <br>
 
-A escolha da utilização de um `venv` derivou dos seguintes fatores:
+A escolha da utilização de um ambiente `conda` derivou dos seguintes fatores:
 
-* ``Bibliotecas extensas``: para facilitar o acesso e redução de tempo perdido em instalação de bibliotecas 
-* ``Isolamento de dependências``: Evita conflitos entre projetos e garante compatibilidade.
+* ``Bibliotecas extensas``: a implementação de um ambiente virtual automatiza a instalação das bibliotecas, facilitando o acesso e reduzindo o de tempo perdido na instalação das mesmas;
+ 
+* ``Isolamento de dependências``: ao criar um ambiente separado, evitam-se conflitos entre bibliotecas de outros projetos e garante-se a compatibilidade;
 
-* ``Organização``: Mantém a pasta do Python organizada e facilita a identificação de bibliotecas.
+* ``Organização``: sendo este ambiente naturalmente mais reduzido em relaçáo ao ambiente nativo da máquina, a sua utilização mantém a pasta do Python organizada e facilita a identificação de bibliotecas;
 
-* ``Reprodutibilidade``: Facilita o compartilhamento e a execução do código em diferentes máquinas.
+* ``Reprodutibilidade``: a criação de um ficheiro [requirements.txt](requirements.txt) facilita a partilha e a execução do código em diferentes máquinas, tornando o programa compatível em qualquer máquina;
 
-* ``Gestão de versões``: Permite instalar e manter diferentes versões de bibliotecas para cada projeto.
+* ``Gestão de versões``: pela simplicidade da ferramenta `conda`, torna-se fácil instalar e manter diferentes versões de bibliotecas para cada projeto, sem nunca correr o risco de causar conflitos de dependências;
 
-* ``Leveza``: Facilita o compartilhamento do código entre diferentes máquinas.
+* ``Leveza``: a transmissão e instalação do ambiente é facilitada com pelo ficheiro [requirements.txt](requirements.txt) sendo portanto apenas necessários menos que `30 KB` de espaço livre em disco para obter a lista detalhada com todas as bibliotecas utilizadas.
 
-## Instalar o programa 
+## Instalar o programa
+
+#### Pré-Requisitos
+* Conda
+* Git *(opcional)*
+* VSCode
 
 #### Primeiro passo 
-Extrair o .zip da página github e descomprimir o ficheiro
+Extrair o `.zip` da página GitHub e descomprimir o ficheiro
 
-#### Segundo passo 
+*OU*
 
- Abrir terminal ``utilizar CMD``
+Abrir terminal (`CMD`, `PowerShell`, `Anaconda Prompt`, ou outros que reconheçam o comando `conda`), navegar até a pasta onde deseja instalar o repositório, e introduzir o seguinte código:
+```
+git clone https://github.com/Bugss05/IACD_Predicting_Hepatocellular_Carcinoma_through_SML.git
+```
+
+#### Segundo passo
+Caso ainda não o tenha feito, abrir um dos terminais mecionados no passo anterior
+
 #### Terceiro passo
-Entrar no diretório da pasta pelo terminal
+Introduzir o seguinte código:
 ```
-cd (diretório da pasta)
+cd <diretorio_do_repositorio>
+conda install -n dataSci --file requirements.txt
 ```
-#### Quarto passo 
-Ativar o virtual enviroment
+E esperar que a instalação esteja concluida
 
+#### Quarto passo 
+Abrir o VSCode e, na barra de pesquisa no topo do ecrã, digitar:
 ```
-.venv\Scrips\activate.bat 
+>Python: Select Interpreter
 ```
+Clicar `Enter`, e selecionar o interpretador de Python que tenha como nome `Python 3.11.9 ('dataSci')`
+
+
 #### Quinto passo
-Abrir jupyter notebook 
+Navegar até ao diretório correto através do terminal e abrir o ficheiro `.py` ou `.ipynb` desejado:
 ```
-jupyter notebook 
+cd <diretorio_do_repositorio>
+data.ipynb (por exemplo)
 ```
+>**Nota:** caso pretenda utilizar o ficheiro [app.py](app.py), o codigo é ligeiramente diferente:
+```
+streamlit run app.py
+```
+
 ## Bibliotecas utilizadas e as suas versões
 #### As bibliotecas principais são:
 >Lembrete : Não é necessário instalar nenhuma das bibliotecas.
@@ -80,15 +104,15 @@ jupyter notebook
     </tr>
     <tr>
       <td>numpy</td>
-      <td>1.24.4</td>
+      <td>1.23.5</td>
     </tr>
     <tr>
       <td>ydata-profiling</td>
-      <td>4.7.0</td>
+      <td>4.1.1</td>
     </tr>
     <tr>
-      <td>jupyter</td>
-      <td>1.0.0</td>
+      <td>jupyter_core</td>
+      <td>5.5.0</td>
     </tr>
     <tr>
       <td>dataprep</td>
