@@ -1,23 +1,34 @@
 import pandas as pd
 import numpy as np
-import streamlit as st
 import heapq
 class Dataset:
     def __init__(self, df, missing_values):
         self.df = df
         self.missing_values = missing_values
-        
+
+
     def pintarMissingValues(self):#pintar a tabela de missing values
         if self.missing_values is not None:#se existirem missing values
             self.df.replace(self.missing_values, "NaN", inplace=True)#substituir missing values por string "NaN" devido a limitação do site 
             return self.df.style.applymap(lambda valor: "color: red;" if valor=="NaN" else "")#pintar missing values a vermelho
         else: return self.df #se não existirem missing values
 
+
     def missing_values_percentagem(self):#Percentagem de missing values
         self.df.replace(self.missing_values, np.nan, inplace=True)#substituir missing values por NaN e nao string "NaN"
         missing_values_percentages = self.df.isnull().mean() * 100#calcular a percentagem de missing values
         return missing_values_percentages.tolist()#retornar a percentagem de missing values
     
+    
+    def remove_int_columns(self):
+        df_copy = self.df.copy()  # create a copy of the dataframe
+        numerical=self.df_num()
+        common_columns = set(self.df.columns) & set(numerical.columns)
+        df_copy = df_copy.drop(common_columns, axis=1)
+        
+        return df_copy
+    
+
     def df_num(self):
         # Replace missing values with None
         dataframe= self.replace_nan_with_none()
@@ -31,6 +42,7 @@ class Dataset:
 
         return self.df
 
+
     def replace_nan_with_none(self):
         self.df.replace(self.missing_values, None, inplace=True)
         return self.df
@@ -41,6 +53,7 @@ class Dataset:
             return ['background-color: blue' if (column, index) in outliers else '' for index in series.index]
         return df.style.apply(lambda x: highlight_value(x, x.name), axis=0)#Aplicar a função a cada coluna
     
+
     def tabelaHEOM(self):
         self.df = self.replace_nan_with_none()#Trocar missing values para none
         tabela = pd.DataFrame()
@@ -55,6 +68,7 @@ class Dataset:
             tabela = pd.concat([tabela, pd.DataFrame({i: lista})], axis=1)#adicionar a lista à tabela
         return tabela
     
+
     def HEOM(self, paciente_1, paciente_2): #Heterogeneous Euclidean-Overlap Metric
         soma = 0
         for feature in self.df.columns:# iterar sobre as V
@@ -63,6 +77,7 @@ class Dataset:
         soma= soma**(1/2)
         return soma
     
+
     def distanciaGeral(self, feature:str, paciente_1:int, paciente_2:int)->int:
         try :#Se a variavel for numerica vem para aqui
             #distancia normalizada
@@ -78,16 +93,18 @@ class Dataset:
             else: 
                 return 1
     
-    def outliers(self,info):
+
+    def outliers(self,info:str,vizinhos=None)->pd.DataFrame:
         # Selecionar apenas as colunas numéricas
+        categorical_features = self.remove_int_columns() 
         numeric_df = self.df_num()
 
         colunas_numericas = numeric_df.columns
-        if info == 'index':
-            outliers = []
-        elif info == 'style':
+        if info == 'style':
             outliers = set()
         for coluna in colunas_numericas:#calcular os outliers usando o IQR
+            if info == 'tratamento':
+                outliers = []
             q1 = numeric_df[coluna].quantile(0.25)
             q3 = numeric_df[coluna].quantile(0.75)
             iqr = q3 - q1
@@ -95,21 +112,53 @@ class Dataset:
             limite_superior = q3 + 1.5 * iqr
             for index, value in numeric_df[coluna].items():#adicionar outliers ao set
                 if value < limite_inferior or value > limite_superior:
-                    if info == 'index' and coluna not in ["Iron", "Sat", "Ferritin"]:
-                        outliers.append((index, coluna))
+                    if info == 'tratamento' and coluna not in ["Iron", "Sat", "Ferritin"]:
+                        if self.df.loc[index, coluna] > limite_superior * 5 or self.df.loc[index, coluna] < limite_inferior * 5:
+                            outliers.append((index, coluna))
                     elif info == 'style':
                         outliers.add((coluna, index))
-        if info == 'index':
-            return self.tratamentoOutliers(outliers, limite_inferior, limite_superior)
-        
-        elif info == 'style':
+            if info == 'tratamento':
+                self.df= self.tratamentoOutliers(outliers, coluna,vizinhos)
+        if info == 'style':
             # Apply styling to outliers
             styled_df = self.pintarOutliers(numeric_df, outliers)
             return styled_df
+        if info == 'tratamento': 
+            self.df = (pd.concat([categorical_features,self.df ], axis=1))
+            return self.df
+    
+    
+    def tratamentoOutliers(self, outliers, coluna,vizinhos):
+        
+        lista_valores = self.df[coluna].tolist()#todos os valores da coluna 
+        contador = -1
+        valores_out = [self.df.loc[index,coluna] for index,coluna in outliers]#valores dos outliers
+        for valor_outlier in valores_out:# iterar por todos os outliers
+            contador+=1
+            outlier = valor_outlier
+            dicionario_distancias = []
+            for valor in lista_valores:
+
+                if outlier != valor and valor not in valores_out and not pd.isna(valor):
+
+                    distancia = self.HEOM(lista_valores.index(valor), lista_valores.index(outlier))#calcular a distancia entre o outlier e os outros valores
+                    if len(dicionario_distancias) < vizinhos:
+                        heapq.heappush(dicionario_distancias, (-distancia, valor))
+                    else:
+                        if -distancia > dicionario_distancias[0][0]:
+                            heapq.heapreplace(dicionario_distancias, (-distancia, valor))
+
+            k_proximos = [abs(item[1]) for item in dicionario_distancias]# selecionar os k vizinhos mais proximos
+            
+            media = sum(k_proximos)/len(k_proximos)
+            self.df.loc[outliers[contador][0], coluna] = media
+        return self.df
+
 
     def fill_missing_values(self, nr_vizinhos:int) -> pd.DataFrame:
 
         self.df = self.replace_nan_with_none() # Replace missing values with None 
+
         self.df = self.df.drop(['Iron', 'Sat', 'Ferritin'], axis=1)# Drop unnecessary columns
         df_copiada = self.df.copy()# Create a copy of the DataFrame
 
@@ -136,15 +185,18 @@ class Dataset:
             except:
                 value = self.df.loc[row_index, col]
 
-            if value is not None:
+            if value is not None and not pd.isna(value):
                 column_values.append(value)
         if len(column_values) == 0:
+
             return self.subs_na_tabela(self.linhas_mais_proximas(vizinhos+1,i), col,vizinhos+1,i)
         # Calculate the result based on the type of values
         if isinstance(column_values[0], str):
+
             # If values are strings, return the most frequent value
             return max(set(column_values), key=column_values.count)
         elif isinstance(column_values[0], (int, float)):
+
             # If values are numeric, return the mean
             return np.mean(column_values)
         
@@ -169,6 +221,7 @@ class Dataset:
 
         return closest_rows
     
+
     def categorical_to_numerical(self):
         """
         _summary_: converts all categorical features to numerical values
@@ -197,8 +250,9 @@ class Dataset:
                  "Grade III/IV","Mild","Moderate/Severe","Dies","Lives")
         values = (0,1,0,1,0,1,2,3,4,0,1,2,1,2,0,1)
         self.df.replace(words, values, inplace=True)
-        return self.df         
-    
+        return self.df
+
+
     @classmethod #este classmethod funciona como um construtor alternativo e construir um dataframe a partir de um arquivo cs
 
     def builderData(cls, df, missing_values): 

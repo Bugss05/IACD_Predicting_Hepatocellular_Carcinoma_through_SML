@@ -1,9 +1,12 @@
+
 import streamlit as st
 import pandas as pd 
 import numpy as np
 from notebook import *
 st.set_page_config(layout="wide")
 df=pd.read_csv("hcc_dataset.csv")# Abrir o data-set
+
+
 
 st.markdown('''# <font size="65">Predicting Hepatocellular Carcinoma through Supervised Machine learning</font>
 
@@ -151,8 +154,8 @@ st.latex(r'''\begin{align*}
 data = Dataset.builderData(df, "?")
 st.header("Tabela de Outliers")
 
-grafico_outliers= data.outliers()
-st.dataframe(grafico_outliers, height=750,use_container_width=True)#Tabela de Outliers
+grafico_outliers= data.outliers('style')
+st.dataframe(grafico_outliers, height=900,use_container_width=True)#Tabela de Outliers
 st.markdown('''
 Apesar dos outliers representarem valores fora do normal decidimos nao os altdulterar pois estes valores representam diversidade de dados e podem ser importantes para a previsão de sobrevivencia dos pacientes num caso de resultados semelhantes.<br>
 Eis o respetivo código:
@@ -247,7 +250,7 @@ Este calculo baseia se todo em ``semelhanças`` que se relacionam em posteorment
             
 >Neste primeiro passo inicia-se uma tripla condição:
 >* Se x ou y são desconhecidos, a distância é 1
->* Se a coluna ``a`` é nominal (variável categórica), faz-se um cálculo simples de overlap das variaveis .
+>* Se a coluna ``a`` é categórica, faz-se um cálculo simples de overlap das variáveis .
 >* Por fim se a coluna ``a`` é numérica, calcula-se a diferença relativa entre x e y na função rn_diff.
       
     ''',unsafe_allow_html=True)
@@ -255,9 +258,9 @@ Este calculo baseia se todo em ``semelhanças`` que se relacionam em posteorment
 st.latex(r'''
 d_a(x, y) = 
 \begin{cases} 
-1 & \text{if } x \text{ or } y \text{ is unknown; else} \\
-\text{overlap}(x, y) & \text{if } a \text{ is nominal,else} \\
-\text{rn\_diff}_a(x, y) & \text{otherwise}
+1 & \text{se} x \text{ ou } y \text{ é desconhecido; else} \\
+\text{overlap}(x, y) & \text{se } a \text{ é categórico,else} \\
+\text{rn\_diff}_a(x, y) & \text{senão}
 \end{cases}
 ''')
 
@@ -271,8 +274,8 @@ st.markdown('''
 st.latex(r'''
 overlap(x, y) = 
 \begin{cases} 
-0 & \text{if } x = y \\
-1 & \text{otherwise}
+0 & \text{se } x = y \\
+1 & \text{senão}
 \end{cases}
 ''')
 
@@ -288,20 +291,477 @@ st.latex(r'''\text{range}_a(x, y) = \text{max}_a - \text{min}_a''')
 #codigo para os calculos utilizados na metrica HEOM
 st.markdown('''<br><br>
             
->Finalmente, aplica-se formula final que adiciona o quadrado das ditancias de cada coluna e dps fazendo a sua raiz quadrada que conclui assim a formula HEOM. 
+>Finalmente, aplica-se formula final que faz o calculo Euclideano em todas as distancias que conclui assim a fórmula HEOM. 
 
 ''', unsafe_allow_html=True)
 st.latex(r'''\text{HEOM}(x, y) = \sqrt{\sum_{a=1}^{m} d_a(x_a, y_a)^2}
 ''')
 
-st.markdown('''Eis a respetiva tabela HEOM:<br><br>''', unsafe_allow_html=True)
+st.markdown('''
+Este Cálculo é muito demorado devido a todas as suas operações. Só neste Dataset existem 50 variáveis que têm de ser comparadas entre cada par de pacientes.
+             
+Todos estes loops contribuem para um aumento da *Time complexity* que acaba por resultar  <span style="color: red; font-weight: bold;">${O_n(n^2*m)}$</span> no qual n é o nr de variáveis e m o número de pacientes . <br>
+Eis a respetiva tabela HEOM: <br><br>''', unsafe_allow_html=True)
 
-data = Dataset.builderData("Tabela_HEOM.csv", "?")
-st.dataframe(data.df, height=840, use_container_width=True)
+st.code('''
+    def tabelaHEOM(self):
+        self.df = self.replace_nan_with_none()#Trocar missing values para none
+        tabela = pd.DataFrame()
+        for i in range(len(self.df)):
+            lista = []
+            for j in range(len(self.df)):#Não interessa comparar pares de pacientes duas vezes
+                if i >= j:
+                    lista.append("X")# colocar x por motivos estéticos
+                else:
+                    lista.append(self.HEOM(i, j))# lista de um paciente em calculo HEOM
+
+            tabela = pd.concat([tabela, pd.DataFrame({i: lista})], axis=1)#adicionar a lista à tabela
+        return tabela
+    
+    def HEOM(self, paciente_1, paciente_2): #Heterogeneous Euclidean-Overlap Metric
+        soma = 0
+        for feature in self.df.columns:# iterar sobre as V
+            distancia = self.distanciaGeral(feature, paciente_1, paciente_2)# calcular a sua "distancia"
+            soma += distancia**2
+        soma= soma**(1/2)
+        return soma
+    
+    def distanciaGeral(self, feature:str, paciente_1:int, paciente_2:int)->int:
+        try :#Se a variavel for numerica vem para aqui
+            #distancia normalizada
+            valorPaciente_1 = float(self.df.loc[paciente_1, feature])
+            valorPaciente_2 = float(self.df.loc[paciente_2, feature])
+            numeric_feature = pd.to_numeric(self.df[feature], errors='coerce')
+            return abs(valorPaciente_1 - valorPaciente_2) / (numeric_feature.max() - numeric_feature.min())# retornar a range 
+        except :#Se a variavel for categorica vem para aqui
+            valorPaciente_1 = self.df.loc[paciente_1, feature]
+            valorPaciente_2 = self.df.loc[paciente_2, feature]
+            if valorPaciente_1 == valorPaciente_2 and  not pd.isna(valorPaciente_1):#Se forem iguais e não forem missing values
+                return 0
+            else: 
+                return 1
+
+''', language="python")
+
+
+st.header("Tabela com missing values substituidos")
+data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
+st.dataframe(data.df, height=840, use_container_width=False)  # Tabela da media
+
+col1, col2,col3,col4 = st.columns(spec=[0.2,0.1,0.1,0.2])
+with col2:
+    st.header("Tabela com missing values ")
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela1 = data.df_num().mean().to_frame("Média")
+    st.dataframe(tabela1, height=840, use_container_width=False)  # Tabela da media
+
+with col3:
+    st.header("Tabela com missing values substituidos")
+    data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
+    tabela2 = data.df.mean(numeric_only=True).to_frame("")
+    st.dataframe(tabela2, height=840, use_container_width=False)  # Tabela da media
+with col4:
+    st.header("Desvio  Relativo (%)")
+    # Calculate the relative deviation
+    relative_deviation = (abs(tabela1.iloc[:, 0] - tabela2.iloc[:, 0]) / tabela1.iloc[:, 0]) * 100
+
+    # Convert the relative deviation to a DataFrame and name the column
+    relative_deviation = relative_deviation.to_frame("Desvio Relativo (%)")
+
+    # Display the relative deviation DataFrame
+    st.dataframe(relative_deviation, height=840)
+
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.metrics import accuracy_score, precision_score
+from sklearn.preprocessing import StandardScaler
+import altair as alt
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+
+data = Dataset.builderData("Tabela_OT_antes_MV.csv", "?")
+X = data.df.drop(columns=['Class']).dropna()
+y = data.df['Class']
+
+
+test_sizes = [0.1,0.15,0.20,0.25, 0.3,0.35, 0.4]  # List of different test sizes
+random_states = [42, 123, 456]  # List of different random states
+k_neighbors = range(1, 99)  # Range of k neighbors
+
+results = []  # List to store the results
+#_______________________________________________________________________________________________________________________
 
 
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=456)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+knn = KNeighborsClassifier(n_neighbors=4)
+fit = knn.fit(X_train, y_train)
+accuracy = accuracy_score(y_test, fit.predict(X_test))
+
+
+#_______________________________________________________________________________________________________________________
 
 
 
+k=list(range(1,100))
+accuracy=[]
+for i in k:
+    knn = KNeighborsClassifier(n_neighbors=i)
+    fit = knn.fit(X_train, y_train)
+    accuracy.append(accuracy_score(y_test, fit.predict(X_test)))
+df_acc = pd.DataFrame({'K Values': k, 'Accuracy Score': accuracy})  
+alt_c = alt.Chart(df_acc).mark_circle().encode(
+    alt.X('K Values:Q', scale=alt.Scale(zero=False)),
+    alt.Y('Accuracy Score:Q', scale=alt.Scale(domain=[0.2, 0.8]))
+).interactive()
+st.header("Gráfico de KNN por Hyperparameter antes de outliers")
+st.altair_chart(alt_c, use_container_width=True)  
 
+
+
+#_______________________________________________________________________________________________________________________
+
+
+
+# Reduce the dimensionality of your data to 2 dimensions using PCA
+pca = PCA(n_components=2)
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+X_pca = pca.fit_transform(X)
+
+# Create a DataFrame with the data
+df_pca = pd.DataFrame({'PC1': X_pca[:, 0], 'PC2': X_pca[:, 1], 'Class': y})
+df_pca['Class'] = df_pca['Class'].map({1: 'Vive', 0: 'Morre'})
+# Create the chart with scaled x values
+alt_c = alt.Chart(df_pca).mark_circle().encode(
+    alt.X('PC1:Q', scale=alt.Scale(domain=[-5.5, 7.5])),
+    alt.Y('PC2:Q',scale=alt.Scale(domain=[-6, 10])),
+    color='Class'
+).interactive().properties(height=800)
+
+# Display the chart
+st.header("Gráfico de PCA (Principal Component Analysis) antes da modificação de outliers")
+st.altair_chart(alt_c, use_container_width=True, theme=None)
+st.markdown('''<br>
+            
+Como sao muitas variaveis e muitos pacientes muita da data é perdida e por isso o grafico tender para esta forma linear. <br>
+Fizemos uma especie de Hyperparameter tuning para encontrar o melhor valor de K para o KNN. <br>            
+            ''',unsafe_allow_html=True)
+
+
+
+#_______________________________________________________________________________________________________________________
+
+
+
+k_values = [i for i in range (1,100)]
+scores = []
+
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+for k in k_values:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    score = cross_val_score(knn, X, y, cv=10)
+    scores.append(np.mean(score))
+df_scores = pd.DataFrame({'K Values': k_values, 'Accuracy Score': scores})
+
+alt_c = alt.Chart(df_scores).mark_circle().encode(
+    alt.X('K Values:Q', scale=alt.Scale(zero=False)),
+    alt.Y('Accuracy Score:Q', scale=alt.Scale(domain=[0.5, 0.8]))
+).interactive().properties(height=800)
+st.header("Gráfico de KNN por cross-validation antes de outliers 10 folds")
+st.altair_chart(alt_c, use_container_width=True)
+
+
+
+#_______________________________________________________________________________________________________________________
+
+
+
+results= Dataset.builderData("results_DCHP.csv", "?")
+# Create the Altair chart
+chart = alt.Chart(results.df).mark_circle().encode(
+    x=alt.X('Precision:Q', scale=alt.Scale(zero=False)),
+    y=alt.Y('Accuracy:Q', scale=alt.Scale(zero=False)),
+    color=alt.Color('Test_Size:N'),
+    size='Depth:N',
+    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision']
+).interactive().properties(height=800)
+
+# Display the chart
+st.header("Gráfico de Decision Tree por Hyperparameter antes de outliers")
+st.altair_chart(chart, use_container_width=True, theme=None)
+
+
+
+#_______________________________________________________________________________________________________________________
+
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+
+# Assuming X is your feature set and y is the target variable
+# X, y = load_your_data()
+
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Define the parameter ranges
+depths = range(6, 14)
+min_samples_splits = range(2, 11)
+min_samples_leafs = range(1, 11)
+
+# Initialize an empty list to store the results
+results_list = []
+
+# Loop over the parameter ranges
+for depth in depths:
+    for min_samples_split in min_samples_splits:
+        for min_samples_leaf in min_samples_leafs:
+            # Create the classifier
+            clf = DecisionTreeClassifier(max_depth=depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf)
+
+            # Perform cross-validation
+            cv_scores = cross_val_score(clf, X, y, cv=5)
+
+            # Store the results
+            results_list.append({
+                'Mean_CV_Score': cv_scores.mean(),
+                'Std_CV_Score': cv_scores.std(),
+                'Depth': depth,
+                'Min_Samples_Split': min_samples_split,
+                'Min_Samples_Leaf': min_samples_leaf
+            })
+
+# Convert the list of results into a DataFrame
+resultados_DC_CV = pd.DataFrame(results_list)
+grafico_DC_CV = alt.Chart(resultados_DC_CV).mark_circle().encode(
+    x=alt.X('Mean_CV_Score:Q', scale=alt.Scale(zero=False)),
+    y=alt.Y('Std_CV_Score:Q', scale=alt.Scale(zero=False)),
+    color=alt.Color('Depth:N'),
+    size=alt.value(600),
+    tooltip=['Mean_CV_Score', 'Std_CV_Score', 'Depth', 'Min_Samples_Split', 'Min_Samples_Leaf']
+).interactive().properties(height=800)
+st.header("Gráfico de Decision Tree por Cross-Validation antes de outliers")
+st.altair_chart(grafico_DC_CV, use_container_width=True, theme=None)
+
+
+
+#_______________________________________________________________________________________________________________________
+
+
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import numpy as np
+
+# Assuming X is your feature set and y is the target variable
+# X, y = load_your_data()
+
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Define the parameter grid
+param_grid = {
+    'max_depth': np.arange(1, 11),
+    'min_samples_split': np.arange(2, 11),
+    'min_samples_leaf': np.arange(1, 11)
+}
+
+# Create the classifier
+clf = DecisionTreeClassifier()
+
+# Create the GridSearchCV object
+grid_search = GridSearchCV(clf, param_grid=param_grid, cv=5)
+
+# Fit the GridSearchCV object to the data
+grid_search.fit(X, y)
+
+# Get the best parameters
+best_params = grid_search.best_params_
+
+# Get the best score
+best_score = grid_search.best_score_
+
+# Create a DataFrame to store the best results
+results = pd.DataFrame([best_params])
+results['Best_Score'] = best_score
+
+# Display the results
+print(results)
+
+
+
+#_______________________________________________________________________________________________________________________
+
+
+
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import numpy as np
+
+# Assuming X is your feature set and y is the target variable
+# X, y = load_your_data()
+
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Define the parameter grid
+param_grid = {
+    'max_depth': np.arange(1, 11),
+    'min_samples_split': np.arange(2, 11),
+    'min_samples_leaf': np.arange(1, 11)
+}
+
+# Create the classifier
+clf = DecisionTreeClassifier()
+
+# Create the RandomizedSearchCV object
+random_search = RandomizedSearchCV(clf, param_distributions=param_grid, n_iter=1000, cv=5, random_state=456)
+
+# Fit the RandomizedSearchCV object to the data
+random_search.fit(X, y)
+
+cv_results = random_search.cv_results_
+
+# Create a DataFrame to store the best results
+results = pd.DataFrame(cv_results).sort_values('rank_test_score')
+st.dataframe(results)
+
+
+
+#_______________________________________________________________________________________________________________________
+
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import accuracy_score, precision_score
+import pandas as pd
+
+# Assume X is your features and y is your target
+test_sizes = [ 0.15 , 0.2 , 0.25 , 0.3 , 0.35 , 0.4 , 0.45 , 0.5]
+random_states = [12, 23, 35, 47, 52, 58, 63, 75, 84, 92, 101, 112, 118, 25, 99]
+weights = ['balanced', None]
+
+results = []
+
+for test_size in test_sizes:
+    for random_state in random_states:
+        for weight in weights:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+            # Initialize the Logistic Regression model
+            model = LogisticRegression(class_weight=weight)
+
+            # Fit the model to the training data
+            model.fit(X_train, y_train)
+
+            # Use the model to make predictions on unseen data
+            predictions = model.predict(X_test)
+
+            # Calculate accuracy and precision
+            accuracy = accuracy_score(y_test, predictions)
+            precision = precision_score(y_test, predictions)
+
+            # Append results to the results list
+            results.append({
+                'Accuracy': accuracy,
+                'Precision': precision,
+                'Test Size': test_size,
+                'Random State': random_state,
+                'Weight': weight
+            })
+
+# Convert results to DataFrame
+results_df = pd.DataFrame(results)
+st.dataframe(results_df)
+grafico_RG = alt.Chart(results_df).mark_circle().encode(
+    x=alt.X('Precision:Q', scale=alt.Scale(zero=False)),
+    y=alt.Y('Accuracy:Q', scale=alt.Scale(zero=False)),
+    color='Weight:N',
+    size='Test Size',
+    tooltip=['Accuracy','Precision','Test Size','Random State','Weight']
+).interactive().properties(height=800)
+st.header("Gráfico de Logistic Regression por Hyperparameter depois de outliers")
+st.altair_chart(grafico_RG, use_container_width=True, theme=None)
+#_______________________________________________________________________________________________________________________
+
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import numpy as np
+
+# Assuming X is your feature set and y is the target variable
+# X, y = load_your_data()
+
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Define the parameter grid
+param_grid = {
+    'C': np.logspace(-4, 4, 20),
+    'penalty': ['l1', 'l2'],
+    'solver': ['liblinear'],
+    'class_weight': ['balanced', None],
+    'random_state': [42, 52, 62]
+}
+
+# Create the classifier
+clf = LogisticRegression()
+
+# Create the GridSearchCV object
+grid_search = GridSearchCV(clf, param_grid=param_grid, cv=5)
+
+# Fit the GridSearchCV object to the data
+grid_search.fit(X, y)
+
+# Get the cross-validation results
+cv_results = grid_search.cv_results_
+
+# Convert the results to a DataFrame
+results_df = pd.DataFrame(cv_results)
+
+# Display the results
+st.dataframe(results_df)
+import altair as alt
+
+# Convert the 'param_' columns from the results_df DataFrame to a more readable format
+params_df = results_df[['param_C', 'param_penalty', 'param_solver', 'param_class_weight', 'param_random_state']].applymap(str)
+
+# Create a new column 'params' in results_df that contains the combined parameters
+results_df['params'] = params_df.apply(lambda row: '_'.join(row.values), axis=1)
+
+# Melt the DataFrame to get a long format where each row is a unique combination of parameters and random state
+melted_df = results_df.melt(id_vars='params', value_vars=['param_random_state'], var_name='Random State', value_name='Mean Test Score')
+
+# Create a heatmap
+heatmap = alt.Chart(melted_df).mark_rect().encode(
+    x='Random State:O',
+    y='params:O',
+    color='Mean Test Score:Q',
+    tooltip=['params', 'Random State', 'Mean Test Score']
+)
+
+# Display the heatmap
+heatmap
