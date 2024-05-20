@@ -19,7 +19,7 @@ Trabalho realizado por:
 
 O objetivo deste projeto é abordar um caso real do conjunto de dados, representativo de pacientes que sofrem de Carcinoma Hepatocelular (HCC), mais comumente conhecido como cancro do fígado. O conjunto mencionado de dados HCC ([hcc_dataset.csv](hcc_dataset.csv)) foi recolhido no Centro Hospitalar e Universitário de Coimbra (CHUC) em Portugal, e contém dados clínicos reais de pacientes diagnosticados com HCC.<br>
 
-Pretende-se, portanto, desenvolver vários algoritmos SML (Supervised Machine Learning), capazes de determinar a probabilidade de sobrevivência dos pacientes após 1 ano do diagnóstico (aspeto identificado na coluna `"Class"` com `"Lives"` ou `"Dies"`). <br>
+Pretende-se, portanto, desenvolver vários algoritmos SML (Supervised Machine Learning), capazes de classificar os pacientes relativamente à sua sobrevivência após 1 ano do diagnóstico (aspeto identificado na coluna `"Class"` com `"Lives"` ou `"Dies"`). <br>
 
 
  ## Como opera o programa
