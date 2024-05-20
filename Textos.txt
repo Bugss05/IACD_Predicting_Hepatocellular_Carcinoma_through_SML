@@ -1,0 +1,116 @@
+Este estudo foi desenvolvido pelos alunos
+
+-bugs
+-pepperoni
+-indiano
+
+no âmbito programático da Licenciatura em Inteligência Artifical e Ciência de Dados, em colaboração com as Faculdades de Ciências e Engenharia da Universidade do Porto.
+
+(imagens simbolos da faculdade)
+-----------------------------------
+0. Introdução
+
+O `Carcinoma Hepatocelular (HCC)` surge do mesmo processo de destruição e multiplicação de células que leva à cirrose. É um tumor altamente maligno que apresenta uma taxa de crescimento exponencial, dobrando o seu tamanho a cada 180 dias (em média). Um tumor deste tipo mesmo em fase inicial do seu desenvolvimento condena o seu portador a uma esperança de vida de 8 meses. Já no seu estágio avançado, é expectável que o paciente viva por mais 3 meses. Este é um problema real que assuta muitos pacientes e famílias, mas a maior preocupação clínica é o `desconhecimento das causas e parâmetros deste desenvolvimento anormal`, operando no paciente como um assassino silencioso.
+
+É devido a este desconhecimento que a medicina alia-se à ciência de dados pela busca de certezas. Quanto mais se conhecer sobre, mais rápida a atuação preventiva será. O rápido diagnóstico de um paciente pode ser o fator decisivo para que este sobreviva.
+
+Debruçados sobre este cenário, comprometemo-nos ao objetivo primordial de desenvolver um `algoritmo SML (Supervised Machine Learning)` para classificar os doentes após 1 ano diagnóstico em dois possíveis resultados: `Sobrevive ou Morre`. A amostra deste estudo é um conjunto de dados - `dataset` - do `Centro Hospitalar e Universitário de Coimbra (CHUC)`.
+
+Para o desenvolvimento algorítmico de Supervised Machine Learning, iremos ter por base os seguintes métodos:
+-colocar metodos que utilizamos-
+
+0.1 Sobre o estudo
+
+Tipicamente como data science é trabalhada, todo o código implementado foi desenvolvido em `Jupyter Notebook`.
+ 
+Alguns trechos de código ser-lhe-ão apresentados ao longo do desta documentação, os quais são baseado numa `Class` que criamos chamada `Dataset`. Para além do foco primário do projeto, desejavamos que qualquer dataset pudesse ser convertido num `DataFrame` e que, posteriormente, pudesse ser processado e polido segundo os métodos que desenhamos,a fim a alimentar um algoritmo de machine learning.
+
+Segue-se um exemplar da definição `init` e do construtor `BuilderData`:
+
+1. Data Mining
+
+Talvez o processo mais importante de todo o estudo. Um dos grandes problemas que qualquer data scientist enfrenta é crua forma como os dados são-lhe apresentados. Analogamente, suponhamos que o data set inicial é um minério ouro recém estraído, o qual tem pedaços de outras rochas e impurezas ao seu redor. O trabalho do mineiro é, entre outros, limpar, polir e extrair o máximo de ouro daquele minério: o nosso trabalho não é diferente. Uma boa data análise reproduz um bom resultado final. É nos encarregue analisar os dados, a forma como estes são apresentados e estão representados, relacionar variáveis, lidar com valores em falta, etc.
+
+Neste projeto, no data set `hcc_dataset.csv`, cada `linha` do seu DataFrame representa `um conjunto de caraterísticas de um paciente`, e cada `coluna` representa uma caraterística singular, que chamar-lhes-emos de `atributo` ou `feature`. Estas caraterísticas no contexto do problema são a forma como o doente lidou com o carcinoma, desde caso manifestou `sintomas` até aos níveis de `hemoglobina` ou `ferro`. Conta-se `165 pacientes` com `50 atributos` diferentes, dos quais `27 categóricos` e `23 numéricos`.
+
+Eis o `DataFrame` do nosso dataset:
+
+-print DataFrame-
+
+Assim, de modo a ultrapassarmos esta fase corretamente, decidimos que a nossa `data analysis` guiar-se-ia pelos seguintes aspetos:
+
+- Estatisticas descritivas básicas
+- Análise de Variáveis
+- Missing Values
+- Outliers
+
+1.1 Estatísticas Descritivas básicas
+
+Um dos sistemas mais simples, no entanto dos mais efetivos, é a realização de uma `análise descritiva` de cada atributo. Entende-se por `estatísticas descritivas básicas` as seguintes estatísticas que são apenas aplicáveis a features com valores numéricas:
+
+- Média
+- Mediana
+- Desvio Padrão
+- Assimetria
+- Curtose
+
+Abaixo encontra-se tabelas que exprimem uma estatistica de um determinado atributo, bem como uma descrição suscinta da importância de cada estatística:
+
+-tabelas de estatisticas-
+
+`Média`: representa o valor central dos valores de cada atibuto, muito útil para resumir grandes quantidades de dados num único valor
+
+`Mediana`: útil para entender a têndencia central dos dados, especialmente quando há valores muito extremos fora de padrão `(outliers)`, pois não é afetada por eles como a média
+
+`Desvio Padrão`: Indica o grau de dispersão dos dados. Um desvio padrão alto significa que os dados estão espalhados em uma ampla gama de valores, enquanto um desvio padrão baixo indica que os valores estão próximos da média
+
+`Assimetria`: Ajuda a entender a distribuição dos dados. Uma distribuição assimétrica pode indicar a presença de outliers ou a necessidade de uma transformação dos dados.
+
+`Curtose`: Informa sobre a forma da distribuição dos dados, ajudando a identificar a presença de picos acentuados ou distribuições mais uniformes. Isso pode ser útil para análises estatísticas mais aprofundadas e para a modelagem de dados.
+
+1.2 Análise de Variáveis
+
+Uma análise mais detalhada e aprofundada dos atributos deste dataset foi suportada pela bibloteca `DataPrep`, que gera um relatório com métodos visuais e intuitivos de interação entre todas as variáveis, uma análise mais aprofundada de cada variável individualmente, bem como as correlações entre todas as variáveis. 
+
+Este relatório é lhe apresentado num ficheiro html num separador a parte caso clique aqui --clicar aqui abre o relatorio dataprep--
+
+1.3 Missing Values 
+
+Os missing values são valores de um dado atributo dos quais se desconhece o seu valor real. Ao trabalhar com dados de larga escala, é perfeitamente comum que alguns valores sejam desconhecidos e, por isso, abordagem a este problema é fulcral para o bom funcionamento do algoritmo de Machine Lerning. Ao longo deste capítulo queremos que entenda a nossa linha de pensamento e a forma como abordamos esta questão. 
+
+Resumidamente, o primeiro passo e mais simplório é a `identificação visual dos missing values`. Aqui dispõe do DataFrame com os `missing values` devidamente assinalados e também de um gráfico de barras que denota a quantidade de variáveis por atributo:
+
+### Identificação visual de missing values:
+
+-pintarMissingValues() e grafico de missing values-
+
+Agora com os missing values identificados, podemos debruçar a nossa atenção sobre em como inputar os possíveis valores de cada missing value de uma feature.
+
+Inicialmente, e como já deve ter passado pela cabeça de qualquer um, julgamos que a substituição dos missing values seria adequada pela `média` ou `mediana`. Embora este método não implicasse porblemas futuros no algoritmo de Machine Learning, este método tem um grande prejuízo: a perca de variabilidade dos dados. Nada garante que o verdadeiro valor do missing value inputado semelhante à média ou à mediana, e por isso, o sistema de classificação final ficaria como um cavalo com palas: restrito a um "campo de visão" muito curto.
+
+Por isso, acreditamos que a melhor forma de imputação de missing values fosse por `Heterogeneous Euclidean-Overlap Metric`, ou `HEOM`.
+Passamos a explicar:
+	O Manel tem seu valor da Hemoglobina em falta;
+	A forma como o Manel manifestou a doença é bastante semelhante à forma da Joana, do João e do Pedro.
+	Então será de se esperar que o valor da Hemoglobina do Manel seja (no mínimo) semelhante à média dos valores da Joana, do João e do Pedro.
+
+Ou seja, em traços gerais, podemos imputar um missing value de um atributo de um paciente se calcularmos a distância entre pacientes por HEOM, sinalizarmos os "x" --meter em bonito escrito a mao tipo varivel-- pacientes mais próximos, fizermos a média dos valores do determinado atributo dos pacientes e atribuirmos o valor da média ao missing value. Protemos que soa mais complicado do que realmente é.
+
+Este método calcula a distância entre dois pacientes diferentes pela sua semelhança entre cada atributo de ambos. Vejamos como funciona esta métrica.
+
+--EXLICAR COMO FUNCIONA HEOM--
+
+Agora, com a distancia entre cada paciente calculadado, podemos formar uma matriz que em cada célula contém o valor da distância entre dois pacientes. (Nota que a distancia entre os pacientes X , Y é a mesma que a distancia entre os pacientes Y , X - por isso não deve ser duplamente calculada)
+Abaixo encontra-se tal matriz:
+
+-tabela HEOM-
+
+Assim, podemos proceder à imputação de todos os missing values de um dado pacinete escolhendo os 5 pacientes mais próximos dele, retornando a média do atributo em falta desse paceinte. Assim, o DataFrame final apresenta-se deste modo:
+
+-df com inputação missing values-- 
+
+
+
+
+
+
