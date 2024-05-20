@@ -739,8 +739,16 @@ grid_search.fit(X, y)
 # Get the cross-validation results
 cv_results = grid_search.cv_results_
 
+# Lines 714-729: Your existing code
+
 # Convert the results to a DataFrame
 results_df = pd.DataFrame(cv_results)
+
+# Add a new column 'Scores' that contains the scores of each iteration
+results_df['Scores'] = cv_results['mean_test_score']
+
+# Add a new column 'Std Scores' that contains the standard deviation of the scores of each iteration
+results_df['Std Scores'] = cv_results['std_test_score']
 
 # Display the results
 st.dataframe(results_df)
@@ -753,15 +761,89 @@ params_df = results_df[['param_C', 'param_penalty', 'param_solver', 'param_class
 results_df['params'] = params_df.apply(lambda row: '_'.join(row.values), axis=1)
 
 # Melt the DataFrame to get a long format where each row is a unique combination of parameters and random state
-melted_df = results_df.melt(id_vars='params', value_vars=['param_random_state'], var_name='Random State', value_name='Mean Test Score')
+melted_df = results_df.melt(id_vars=['params','Std Scores'], value_vars=['param_random_state'], var_name='Random State', value_name='Mean Test Score')
 
 # Create a heatmap
 heatmap = alt.Chart(melted_df).mark_rect().encode(
-    x='Random State:O',
-    y='params:O',
-    color='Mean Test Score:Q',
-    tooltip=['params', 'Random State', 'Mean Test Score']
+    x='Std Scores:Q',
+    y='Mean Test Score:Q',
+    color='Random State:Q',
+    tooltip=['Std Scores', 'Random State', 'Mean Test Score']
 )
 
 # Display the heatmap
-heatmap
+st.altair_chart(heatmap, use_container_width=True, theme=None)
+
+#_______________________________________________________________________________________________________________________\
+
+
+from sklearn.metrics import precision_score
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import altair as alt
+
+# Assuming X is your feature set and y is the target variable
+# X, y = load_your_data()
+
+# Standardize the features
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Define the parameter ranges
+depths = range(1, 20)
+min_samples_splits = range(2, 11)
+min_samples_leafs = range(1, 11)
+test_sizes = [0.1, 0.15 , 0.2 , 0.25 , 0.3 , 0.35 , 0.4 , 0.45 , 0.5]
+
+# Initialize a DataFrame to store the results
+results = []
+
+from sklearn.metrics import recall_score
+
+for depth in depths:
+    for min_samples_split in min_samples_splits:
+        for min_samples_leaf in min_samples_leafs:
+            for test_size in test_sizes:
+                # Split the data
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=456)
+
+                # Create and train the classifier
+                clf = DecisionTreeClassifier(max_depth=depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf)
+                clf.fit(X_train, y_train)
+
+                # Make predictions
+                y_pred = clf.predict(X_test)
+
+                # Calculate accuracy, precision and recall
+                accuracy = accuracy_score(y_test, y_pred)
+                precision = precision_score(y_test, y_pred, average='weighted')
+                recall = recall_score(y_test, y_pred, average='weighted')
+
+                # Store the results
+                results.append({
+                    'Accuracy': accuracy,
+                    'Precision': precision,
+                    'Recall': recall,
+                    'Depth': depth,
+                    'Min_Samples_Split': min_samples_split,
+                    'Min_Samples_Leaf': min_samples_leaf,
+                    'Test_Size': test_size
+                })
+results= pd.DataFrame(results)
+results.to_csv("results.csv", index=False)
+
+# Create the Altair chart
+chart = alt.Chart(results).mark_circle().encode(
+    x=alt.X('Precision:Q', scale=alt.Scale(zero=False)),
+    y=alt.Y('Recall:Q', scale=alt.Scale(zero=False)),
+    color=alt.Color('Test_Size:N'),
+    size='Depth:N',
+    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall']
+).interactive().properties(height=800)
+
+# Display the chart
+st.header("Gráfico de Decision Tree por Hyperparameter antes de outliers")
+st.altair_chart(chart, use_container_width=True, theme=None)
