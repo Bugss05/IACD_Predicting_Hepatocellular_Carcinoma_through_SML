@@ -44,8 +44,8 @@ A escolha da utilização de um ambiente `conda` derivou dos seguintes fatores:
 
 #### Pré-Requisitos
 * Conda
-* Git *(opcional)*
 * VSCode
+* Git *(opcional)*
 
 #### Primeiro passo 
 Extrair o `.zip` da página GitHub e descomprimir o ficheiro
