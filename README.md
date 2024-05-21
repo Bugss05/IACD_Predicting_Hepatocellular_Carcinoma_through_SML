@@ -73,7 +73,7 @@ Abrir o VSCode e, na barra de pesquisa no topo do ecrã, digitar:
 ```
 >Python: Select Interpreter
 ```
-Clicar `Enter`, e selecionar o interpretador de Python que tenha como nome `Python 3.11.9 ('dataSci')`
+Clicar `Enter`, e selecionar o interpretador de Python que tenha como nome `Python 3.11.7 ('dataSci')`
 
 
 #### Quinto passo
