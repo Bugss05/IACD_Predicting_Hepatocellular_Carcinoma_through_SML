@@ -3,6 +3,10 @@ import streamlit as st
 import pandas as pd 
 import numpy as np
 from notebook import *
+from PCA import *
+from KNN_scrpt import *
+from SVM_Script import *
+from KNN_scrpt import *
 st.set_page_config(layout="wide")
 df=pd.read_csv("hcc_dataset.csv")# Abrir o data-set
 
@@ -374,27 +378,22 @@ with col4:
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import accuracy_score, precision_score
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score
 from sklearn.preprocessing import StandardScaler
 import altair as alt
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-
+#inicializar o data-set
 data = Dataset.builderData("Tabela_OT_antes_MV.csv", "?")
-X = data.df.drop(columns=['Class']).dropna()
-y = data.df['Class']
-
+data1= data.categorical_to_numerical()
+X = data1.drop(columns=['Class']).dropna()
+y = data1['Class']
 
 test_sizes = [0.1,0.15,0.20,0.25, 0.3,0.35, 0.4]  # List of different test sizes
 random_states = [42, 123, 456]  # List of different random states
 k_neighbors = range(1, 99)  # Range of k neighbors
-
-results = []  # List to store the results
-#_______________________________________________________________________________________________________________________
-
-
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=456)
 scaler = StandardScaler()
@@ -406,49 +405,49 @@ accuracy = accuracy_score(y_test, fit.predict(X_test))
 
 
 #_______________________________________________________________________________________________________________________
-
-
-
-k=list(range(1,100))
-accuracy=[]
-for i in k:
-    knn = KNeighborsClassifier(n_neighbors=i)
-    fit = knn.fit(X_train, y_train)
-    accuracy.append(accuracy_score(y_test, fit.predict(X_test)))
-df_acc = pd.DataFrame({'K Values': k, 'Accuracy Score': accuracy})  
-alt_c = alt.Chart(df_acc).mark_circle().encode(
-    alt.X('K Values:Q', scale=alt.Scale(zero=False)),
-    alt.Y('Accuracy Score:Q', scale=alt.Scale(domain=[0.2, 0.8]))
-).interactive()
-st.header("Gráfico de KNN por Hyperparameter antes de outliers")
-st.altair_chart(alt_c, use_container_width=True)  
-
-
-
+st.write('oladff')
+st.header("Gráfico de KNN vizinhos")
+tab1, tab2 = st.columns(spec=[0.5, 0.5])
+with tab1:
+    G_KNN_HP=Dataset.builderData("Grafico_KNN_HP_MV.csv", "?")
+    grafico_RG = alt.Chart(G_KNN_HP.df).mark_circle().encode(
+    x=alt.X('Accuracy:Q', scale=alt.Scale(domain=[0.0,0.7])),
+    y=alt.Y('Recall:Q', scale=alt.Scale(domain=[0.0,1.3])),
+    color=alt.Color('Neighbors:Q'),
+    size='Test Size:Q',
+    tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
+    ).interactive().properties(height=800)
+    st.altair_chart(grafico_RG, use_container_width=True)  
+with tab2:
+    G_KNN_HP=Dataset.builderData("Grafico_KNN_HP.csv", "?")
+    grafico_RG = alt.Chart(G_KNN_HP.df).mark_circle().encode(
+    x=alt.X('Accuracy:Q', scale=alt.Scale(domain=[0.0,0.7])),
+    y=alt.Y('Recall:Q', scale=alt.Scale(domain=[0.0,1.3])),
+    color=alt.Color('Neighbors:Q'),
+    size='Test Size:Q',
+    tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
+    ).interactive().properties(height=800)
+    st.altair_chart(grafico_RG, use_container_width=True)  
 #_______________________________________________________________________________________________________________________
 
-
-
-# Reduce the dimensionality of your data to 2 dimensions using PCA
-pca = PCA(n_components=2)
-# Standardize the features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-X_pca = pca.fit_transform(X)
-
-# Create a DataFrame with the data
-df_pca = pd.DataFrame({'PC1': X_pca[:, 0], 'PC2': X_pca[:, 1], 'Class': y})
-df_pca['Class'] = df_pca['Class'].map({1: 'Vive', 0: 'Morre'})
-# Create the chart with scaled x values
-alt_c = alt.Chart(df_pca).mark_circle().encode(
+# Display the chart
+tab1, tab2 = st.tabs(['Tabela Missing values sem outliers', 'Tabela Missing values com outliers'])
+with tab1:
+    pca= Dataset.builderData("Grafico_PCA_MV.csv", "?")
+    alt_c = alt.Chart(pca.df).mark_circle().encode(
     alt.X('PC1:Q', scale=alt.Scale(domain=[-5.5, 7.5])),
     alt.Y('PC2:Q',scale=alt.Scale(domain=[-6, 10])),
-    color='Class'
+    color=alt.Color('Class')
 ).interactive().properties(height=800)
-
-# Display the chart
-st.header("Gráfico de PCA (Principal Component Analysis) antes da modificação de outliers")
-st.altair_chart(alt_c, use_container_width=True, theme=None)
+    st.altair_chart(alt_c, use_container_width=True,theme=None)
+with tab2:
+    pca= Dataset.builderData("Grafico_PCA_OT_MV.csv", "?")
+    alt_c = alt.Chart(pca.df).mark_circle().encode(
+    alt.X('PC1:Q', scale=alt.Scale(domain=[-5.5, 7.5])),
+    alt.Y('PC2:Q',scale=alt.Scale(domain=[-6, 10])),
+    color=alt.Color('Class')
+    ).interactive().properties(height=800)
+    st.altair_chart(alt_c, use_container_width=True,theme=None)
 st.markdown('''<br>
             
 Como sao muitas variaveis e muitos pacientes muita da data é perdida e por isso o grafico tender para esta forma linear. <br>
@@ -461,7 +460,7 @@ Fizemos uma especie de Hyperparameter tuning para encontrar o melhor valor de K 
 
 
 
-k_values = [i for i in range (1,100)]
+'''k_values = [i for i in range (1,100)]
 scores = []
 
 scaler = StandardScaler()
@@ -469,14 +468,15 @@ X = scaler.fit_transform(X)
 
 for k in k_values:
     knn = KNeighborsClassifier(n_neighbors=k)
-    score = cross_val_score(knn, X, y, cv=10)
+    score = cross_val_score(knn, X, y, cv=10, scoring='accuracy')
     scores.append(np.mean(score))
 df_scores = pd.DataFrame({'K Values': k_values, 'Accuracy Score': scores})
 
 alt_c = alt.Chart(df_scores).mark_circle().encode(
     alt.X('K Values:Q', scale=alt.Scale(zero=False)),
     alt.Y('Accuracy Score:Q', scale=alt.Scale(domain=[0.5, 0.8]))
-).interactive().properties(height=800)
+).interactive().properties(height=800)'''
+alt_c= Grafico_vizinhos_CV(X,y,100)
 st.header("Gráfico de KNN por cross-validation antes de outliers 10 folds")
 st.altair_chart(alt_c, use_container_width=True)
 
@@ -741,35 +741,26 @@ cv_results = grid_search.cv_results_
 
 # Lines 714-729: Your existing code
 
-# Convert the results to a DataFrame
-results_df = pd.DataFrame(cv_results)
-
-# Add a new column 'Scores' that contains the scores of each iteration
-results_df['Scores'] = cv_results['mean_test_score']
-
-# Add a new column 'Std Scores' that contains the standard deviation of the scores of each iteration
-results_df['Std Scores'] = cv_results['std_test_score']
+# Convert the results to a DataFrame and reset the index
+results_df = pd.DataFrame(cv_results).reset_index()
 
 # Display the results
 st.dataframe(results_df)
 import altair as alt
 
-# Convert the 'param_' columns from the results_df DataFrame to a more readable format
-params_df = results_df[['param_C', 'param_penalty', 'param_solver', 'param_class_weight', 'param_random_state']].applymap(str)
 
-# Create a new column 'params' in results_df that contains the combined parameters
-results_df['params'] = params_df.apply(lambda row: '_'.join(row.values), axis=1)
 
-# Melt the DataFrame to get a long format where each row is a unique combination of parameters and random state
-melted_df = results_df.melt(id_vars=['params','Std Scores'], value_vars=['param_random_state'], var_name='Random State', value_name='Mean Test Score')
+# Rename the 'index' column to 'row_index' to avoid confusion
+results_df = results_df.rename(columns={'index': 'row_index'})
 
-# Create a heatmap
-heatmap = alt.Chart(melted_df).mark_rect().encode(
-    x='Std Scores:Q',
-    y='Mean Test Score:Q',
-    color='Random State:Q',
-    tooltip=['Std Scores', 'Random State', 'Mean Test Score']
-)
+# Now you can use 'row_index' in your Altair chart
+heatmap = alt.Chart(results_df).mark_circle().encode(
+    x=alt.X('mean_test_score:Q', scale=alt.Scale(domain=[0.60, 0.80])),  # Use the row index as the x-axis
+    y=alt.Y('std_test_score:Q', scale=alt.Scale(domain=[0.02, 0.1])),  # Use the mean_test_score as the y-axis
+    color='param_C:N',
+    size=alt.value(300),
+    tooltip=['param_C', 'param_class_weight', 'param_penalty', 'param_random_state', 'mean_test_score', 'std_test_score']
+).interactive().properties(height=800)
 
 # Display the heatmap
 st.altair_chart(heatmap, use_container_width=True, theme=None)
@@ -785,55 +776,7 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import altair as alt
 
-# Assuming X is your feature set and y is the target variable
-# X, y = load_your_data()
-
-# Standardize the features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-# Define the parameter ranges
-depths = range(1, 20)
-min_samples_splits = range(2, 11)
-min_samples_leafs = range(1, 11)
-test_sizes = [0.1, 0.15 , 0.2 , 0.25 , 0.3 , 0.35 , 0.4 , 0.45 , 0.5]
-
-# Initialize a DataFrame to store the results
-results = []
-
-from sklearn.metrics import recall_score
-
-for depth in depths:
-    for min_samples_split in min_samples_splits:
-        for min_samples_leaf in min_samples_leafs:
-            for test_size in test_sizes:
-                # Split the data
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=456)
-
-                # Create and train the classifier
-                clf = DecisionTreeClassifier(max_depth=depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf)
-                clf.fit(X_train, y_train)
-
-                # Make predictions
-                y_pred = clf.predict(X_test)
-
-                # Calculate accuracy, precision and recall
-                accuracy = accuracy_score(y_test, y_pred)
-                precision = precision_score(y_test, y_pred, average='weighted')
-                recall = recall_score(y_test, y_pred, average='weighted')
-
-                # Store the results
-                results.append({
-                    'Accuracy': accuracy,
-                    'Precision': precision,
-                    'Recall': recall,
-                    'Depth': depth,
-                    'Min_Samples_Split': min_samples_split,
-                    'Min_Samples_Leaf': min_samples_leaf,
-                    'Test_Size': test_size
-                })
-results= pd.DataFrame(results)
-results.to_csv("results.csv", index=False)
+results= Dataset.builderData("results_DCHP.csv", "?")
 
 # Create the Altair chart
 chart = alt.Chart(results).mark_circle().encode(
@@ -841,9 +784,23 @@ chart = alt.Chart(results).mark_circle().encode(
     y=alt.Y('Recall:Q', scale=alt.Scale(zero=False)),
     color=alt.Color('Test_Size:N'),
     size='Depth:N',
-    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall']
+    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity']
 ).interactive().properties(height=800)
 
 # Display the chart
-st.header("Gráfico de Decision Tree por Hyperparameter antes de outliers")
+st.header("Gráfico de Decision Tree por Hyperparameter depois de outliers precisão vs recall")
+st.altair_chart(chart, use_container_width=True, theme=None)
+#_______________________________________________________________________________________________________________________\
+
+# Create the Altair chart
+chart = alt.Chart(results).mark_circle().encode(
+    x=alt.X('Specificity:Q', scale=alt.Scale(zero=False)),
+    y=alt.Y('Recall:Q', scale=alt.Scale(zero=False)),
+    color=alt.Color('Test_Size:N'),
+    size='Depth:N',
+    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity']
+).interactive().properties(height=800)
+
+# Display the chart
+st.header("Gráfico de Decision Tree por Hyperparameter depois de outliers especificidade vs recall")
 st.altair_chart(chart, use_container_width=True, theme=None)
