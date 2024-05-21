@@ -28,17 +28,17 @@ Este programa trabalha com um intrepetador `Python` e usa um ambiente virtual `c
 
 A escolha da utilização de um ambiente `conda` derivou dos seguintes fatores:
 
-* ``Bibliotecas extensas``: a implementação de um ambiente virtual automatiza a instalação das bibliotecas, facilitando o acesso e reduzindo o de tempo perdido na instalação das mesmas;
+* **Bibliotecas extensas**: a implementação de um ambiente virtual automatiza a instalação das bibliotecas, facilitando o acesso e reduzindo o de tempo perdido na instalação das mesmas;
  
-* ``Isolamento de dependências``: ao criar um ambiente separado, evitam-se conflitos entre bibliotecas de outros projetos e garante-se a compatibilidade;
+* **Isolamento de dependências**: ao criar um ambiente separado, evitam-se conflitos entre bibliotecas de outros projetos e garante-se a compatibilidade;
 
-* ``Organização``: sendo este ambiente naturalmente mais reduzido em relaçáo ao ambiente nativo da máquina, a sua utilização mantém a pasta do Python organizada e facilita a identificação de bibliotecas;
+* **Organização**: sendo este ambiente naturalmente mais reduzido em relaçáo ao ambiente nativo da máquina, a sua utilização mantém a pasta do Python organizada e facilita a identificação de bibliotecas;
 
-* ``Reprodutibilidade``: a criação de um ficheiro [requirements.txt](requirements.txt) facilita a partilha e a execução do código em diferentes máquinas, tornando o programa compatível em qualquer máquina;
+* **Reprodutibilidade**: a criação de um ficheiro [requirements.txt](requirements.txt) facilita a partilha e a execução do código em diferentes máquinas, tornando o programa compatível em qualquer máquina;
 
-* ``Gestão de versões``: pela simplicidade da ferramenta `conda`, torna-se fácil instalar e manter diferentes versões de bibliotecas para cada projeto, sem nunca correr o risco de causar conflitos de dependências;
+* **Gestão de versões**: pela simplicidade da ferramenta `conda`, torna-se fácil instalar e manter diferentes versões de bibliotecas para cada projeto, sem nunca correr o risco de causar conflitos de dependências;
 
-* ``Leveza``: a transmissão e instalação do ambiente é facilitada com pelo ficheiro [requirements.txt](requirements.txt) sendo portanto apenas necessários menos que `30 KB` de espaço livre em disco para obter a lista detalhada com todas as bibliotecas utilizadas.
+* **Leveza**: a transmissão e instalação do ambiente é facilitada com pelo ficheiro [requirements.txt](requirements.txt) sendo portanto apenas necessários menos que `30 KB` de espaço livre em disco para obter a lista detalhada com todas as bibliotecas utilizadas.
 
 ## Instalar o programa
 
