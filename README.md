@@ -114,6 +114,10 @@ streamlit run app.py
       <td>dataprep</td>
       <td>0.4.5</td>
     </tr>
+    <tr>
+      <td>streamlit</td>
+      <td>1.32.0</td>
+    </tr>
   </tbody>
 </table>
 <br>
