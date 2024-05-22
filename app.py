@@ -3,13 +3,6 @@ import streamlit as st
 import pandas as pd 
 import numpy as np
 from notebook import *
-from PCA import *
-from KNN_scrpt import *
-from SVM_Script import *
-from KNN_scrpt import *
-from Decision_Tree_script import *
-from LR_script import *
-from RF_script import *
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_score
@@ -19,9 +12,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
-
-
-
+from KNN_scrpt import *
 
 
 st.set_page_config(layout="wide")
@@ -118,7 +109,30 @@ Assim, de modo a ultrapassarmos esta fase corretamente, decidimos que a nossa `d
 * Missing Values
 * Outliers''',unsafe_allow_html=True)
             
-            
+data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
+tabela = data.df
+tabela = data.df_num()
+num_colunas = tabela.columns
+
+st.markdown('''
+# Interação entre 2 features do DataFrame
+<br>
+''', unsafe_allow_html=True)
+
+col2, col1 = st.columns([0.75,0.25])
+
+with col1:
+    x_axis = st.selectbox('Eixo X:', num_colunas, index = 0)
+    y_axis = st.selectbox('Eixo Y:', num_colunas, index = 0)
+with col2:
+    scatter_plot = alt.Chart(data.df).mark_circle(size=60).encode(
+        x=x_axis,
+        y=y_axis,
+        tooltip=[x_axis, y_axis]
+    ).interactive().properties(height=600)
+
+    # Display the chart in Streamlit
+    st.altair_chart(scatter_plot, use_container_width=True)        
             
 
 
@@ -287,7 +301,7 @@ Este método calcula a distância entre dois pacientes diferentes pela sua semel
 st.latex(r'''
 d_a(x, y) = 
 \begin{cases} 
-1 & \text{se} x \text{ ou } y \text{ é desconhecido; else} \\
+1 & \text{se } x \text{ ou } y \text{ é desconhecido; else} \\
 \text{overlap}(x, y) & \text{se } a \text{ é categórico,else} \\
 \text{rn\_diff}_a(x, y) & \text{senão}
 \end{cases}
@@ -337,7 +351,7 @@ Heom=Dataset.builderData("Tabela_HEOM.csv", "?")
 st.dataframe(Heom.df, height=840, use_container_width=False)  # Tabela da media
 st.markdown('''Eis o respetivo código:''',unsafe_allow_html=True)
 st.code('''
-    def tabelaHEOM(self):
+    def tabelaHEOM(self)->pd.DataFrame:
         self.df = self.replace_nan_with_none()#Trocar missing values para none
         tabela = pd.DataFrame()
         for i in range(len(self.df)):
@@ -351,7 +365,8 @@ st.code('''
             tabela = pd.concat([tabela, pd.DataFrame({i: lista})], axis=1)#adicionar a lista à tabela
         return tabela
     
-    def HEOM(self, paciente_1, paciente_2): #Heterogeneous Euclidean-Overlap Metric
+
+    def HEOM(self, paciente_1:int, paciente_2:int)->int: #Heterogeneous Euclidean-Overlap Metric
         soma = 0
         for feature in self.df.columns:# iterar sobre as V
             distancia = self.distanciaGeral(feature, paciente_1, paciente_2)# calcular a sua "distancia"
@@ -359,6 +374,7 @@ st.code('''
         soma= soma**(1/2)
         return soma
     
+
     def distanciaGeral(self, feature:str, paciente_1:int, paciente_2:int)->int:
         try :#Se a variavel for numerica vem para aqui
             #distancia normalizada
@@ -384,6 +400,77 @@ Texto explicativo sobre a substituição de missing values
 
 Tabela_preenchida=Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
 st.dataframe(Tabela_preenchida.df, height=840, use_container_width=False)  # Tabela da media
+
+st.markdown('''
+<br><br>
+Eis o respetivo código:''',unsafe_allow_html=True)
+
+st.code('''
+        
+    def fill_missing_values(self, nr_vizinhos:int) -> pd.DataFrame:
+
+        self.df = self.replace_nan_with_none() # Trocar missing values para None 
+
+        self.df = self.df.drop(['Iron', 'Sat', 'Ferritin'], axis=1)# Eliminar colunas desnecessárias
+        df_copiada = self.df.copy()# Criar uma copia do dataframe
+
+        for i in range(len(self.df)): #iterar por todas as linhas
+            row = self.df.iloc[i]
+            
+            if row.isnull().any():# Ver se essa linha tem missing values
+                closest_rows = self.linhas_mais_proximas(nr_vizinhos, i)# Calcular as linhas mais proximas
+    
+                for col in self.df.columns:# Iterar por todas as colunas
+                    if pd.isnull(row[col]): # Se a célula for um missing value substituir na tabela o valor
+                        df_copiada.loc[i, col] = self.subs_na_tabela(closest_rows, col,nr_vizinhos,i)
+        return df_copiada
+    
+    def linhas_mais_proximas(self, vizinhos:int,i:int)->list: # Calcular as linhas mais proximas por cálculo HEOM e retornar as linhas mais próximas
+       
+        heom_values = []
+
+        for j in range(len(self.df)):
+
+            if j != i:
+                heom_distance = self.HEOM(i, j)# Calcular a distância HEOM entre as linhas
+                if len(heom_values) < vizinhos: # Se o número de valores na heap for menor que o número de vizinhos, adicionamos o valor
+
+                    heapq.heappush(heom_values, (-heom_distance, j))
+                else:
+                    if -heom_distance > heom_values[0][0]:#Se a distância for maior que o valor mais pequeno na heap, substituímos o valor
+                        heapq.heapreplace(heom_values, (-heom_distance, j))
+    
+        # Selecionar as linhas mais próximas
+        closest_rows = [item[1] for item in heom_values]
+
+        return closest_rows    
+
+    def subs_na_tabela(self, closest_rows:list, col:int,vizinhos,i)->float | str :
+
+        column_values = []
+
+        for row_index in closest_rows:
+            try:#Ver se a tabela é numérica ou categórica
+
+                value = float(self.df.loc[row_index, col])
+            except:
+                value = self.df.loc[row_index, col]
+
+            if value is not None and not pd.isna(value):#Se o valor não for None, adicionamos à lista
+                column_values.append(value)
+        if len(column_values) == 0:
+
+            return self.subs_na_tabela(self.linhas_mais_proximas(vizinhos+1,i), col,vizinhos+1,i)#Se não houver valores na lista, aumentamos o número de vizinhos e calcula se outra vez até encontrar 
+        
+        if isinstance(column_values[0], str):
+
+            # Se os valores forem strings retornar a moda
+            return max(set(column_values), key=column_values.count)
+        elif isinstance(column_values[0], (int, float)):
+
+            # Se o valor for numérico retornar a média
+            return np.mean(column_values)''' , language="python")
+
 
 st.markdown('''<br><br> 
 Talvez um texto aqui''' ,unsafe_allow_html=True)
@@ -485,6 +572,27 @@ st.markdown('''
 <br>
 texto explicativo sobre os algoritmos de machine learning 
 <br>
+Quando confrontados com os graficos resultantes de Hyperparameters dos vários algoritmos, surgiu a questão: como devemos escolher?
+Assim, para além de ter em conta aspetos como o `test_size` e `n_neighbors` (exemplos de parâmetros do KNN), procuramos implementar outras métricas, nomeadamente **Sensitivity** (ou **Recall**) e **Specificity** cujas formas se apresentam abaixo: <br>
+<br>
+''',unsafe_allow_html=True)
+
+st.latex(r'''{\text{Specificity} = \frac{\text{True Negatives}}{\text{True Negatives} + \text{False Positives}}}''')
+
+st.markdown('''<br>''',unsafe_allow_html=True) 
+
+st.latex(r'''{\text{Sensitivity} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}}''')
+
+st.markdown('''
+<br>
+
+Tal significa, portanto, que a Sensitivity representa, em termos leigos, "dos resultados positivos (`1` ou `"Lives"`), quantos foram analisados corretamente" e a Specificity "dos resultados negativos (`0` ou `"Dies"`), quantos foram analisados corretamente". <br>
+
+Ora, como sendo este um dataset representativo de um diagnóstico médico, é largamente preferível obter um falso positivo em vez de um falso negativo. Esse facto levou-nos a priorizar pontos que maximizem o Recall, garantindo que, um paciente que é, de facto, positivo, seja, categorizado como tal. <br>
+
+Logo, no sentido de definir os melhores parâmetros criamos o gráfico de Accuracy em função de Recall, e escolhemos o ponto mais próximo ao caso ideal (ou seja, o ponto `(1,1)` ). Atente no seguinte mencionado: <br>
+
+
 ## 2.1 Algoritmo KNN 
 <br>
 texto explicativo sobre o algoritmo KNN e utilização de PCA
@@ -510,8 +618,10 @@ with tab2:
 st.markdown('''<br>
 Conbluso sobre o PCA ''',unsafe_allow_html=True)            
 
-st.markdown('''<br><br>
-### 2.1.1 Aplicaçãoo do KNN 
+st.markdown('''
+<br><br>
+            
+###2.1.1 Aplicaçãoo do KNN 
 <br>
 texto explicativo sobre a aplicação do KNN e cross validation''' ,unsafe_allow_html=True)
 
@@ -533,7 +643,6 @@ with tab1:
         opção_escolhidax = optionx1+":Q"
     with col1:
 
-        st.header("Gráfico KNN hyperparameters")
         grafico1= Dataset.builderData("Graficos\Grafico_KNN_HP_MV.csv", "?")
         grafico_RG = alt.Chart(grafico1.df).mark_circle().encode(
         x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.86])),
@@ -651,15 +760,15 @@ with tab5:
         st.markdown("<br><br><br>", unsafe_allow_html=True)
         optionx1 = st.selectbox(
             "Eixo     x",
-            (tuple("Accuracy Precision Recall Specificity".split())), index=0)
+            (tuple("Accuracy Precision Recall Specificity".split())), index=1)
         opção_escolhiday = optiony1+":Q"
         opção_escolhidax = optionx1+":Q"
     with col1:
         st.header("Gráfico Decision Tree hyperparameters com trataemnto de Missing Values")
         grafico5= Dataset.builderData("Graficos\Grafico_DC_HP_MV.csv", "?")
         chart = alt.Chart(grafico5.df).mark_circle().encode(
-        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
-        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
         color=alt.Color('Test_Size:N'),
         size='Depth:N',
         tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity','Random_State']
@@ -677,15 +786,15 @@ with tab6:
         st.markdown("<br><br><br>", unsafe_allow_html=True)
         optionx2 = st.selectbox(
             "Eixo      x",
-            (tuple("Accuracy Precision Recall Specificity".split())), index=0)
+            (tuple("Accuracy Precision Recall Specificity".split())), index=1)
         opção_escolhiday = optiony2+":Q"
         opção_escolhidax = optionx2+":Q"
     with col1:
         st.header("Gráfico Decision Tree hyperparameters com tratamento de Missing Values e Outliers")
         grafico5= Dataset.builderData("Graficos\Grafico_DC_HP_OT_MV.csv", "?")
         chart = alt.Chart(grafico5.df).mark_circle().encode(
-        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
-        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
         color=alt.Color('Test_Size:N'),
         size='Depth:N',
         tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity','Random_State']
@@ -703,15 +812,15 @@ with tab7:
         st.markdown("<br><br><br>", unsafe_allow_html=True)
         optionx2 = st.selectbox(
             "Eixo       x",
-            (tuple("Accuracy Precision Recall ".split())), index=0)
+            (tuple("Accuracy Precision Recall ".split())), index=1)
         opção_escolhiday = optiony2+":Q"
         opção_escolhidax = optionx2+":Q"
     with col1:
         st.header("Gráfico Decision Tree hyperparameters")
         grafico6= Dataset.builderData("Graficos\Grafico_DC_CV_MV.csv", "?")
         grafico_DC_CV = alt.Chart(grafico6.df).mark_circle().encode(
-        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
-        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
         color=alt.Color('Depth:N'),
         size=alt.value(600),
         tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall'])
@@ -728,19 +837,32 @@ with tab8:
         st.markdown("<br><br><br>", unsafe_allow_html=True)
         optionx2 = st.selectbox(
             "Eixo         x",
-            (tuple("Accuracy Precision Recall ".split())), index=0)
+            (tuple("Accuracy Precision Recall ".split())), index=1)
         opção_escolhiday = optiony2+":Q"
         opção_escolhidax = optionx2+":Q"
     with col1:
         st.header("Gráfico Decision Tree hyperparameters")
         grafico7= Dataset.builderData("Graficos\Grafico_DC_CV_OT_MV.csv", "?")
         grafico_DC_CV = alt.Chart(grafico7.df).mark_circle().encode(
-        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
-        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
         color=alt.Color('Depth:N'),
         size=alt.value(600),
         tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall'])
         st.altair_chart(grafico_DC_CV, use_container_width=True)
 
 
+st.markdown('''
+br><br>
 
+talvez um texto aqui 
+
+eis as nossa Decision trees ''' ,unsafe_allow_html=True)
+
+
+tab9,tab10 = st.tabs(['Decision Tree com apenas tratamento de Missing Values','Decision Tree com tratamento de Missing Values e Outliers'])
+
+with tab9:
+    st.image('best_DC_HP_OT_MD.png', caption='Decision Tree com tratamento de Missing Values')
+with tab10:
+    st.image('DC_OT_MV.png', caption='Decision Tree com tratamento de Missing Values e Outliers')
