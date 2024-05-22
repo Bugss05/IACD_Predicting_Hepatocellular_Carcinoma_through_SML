@@ -7,6 +7,23 @@ from PCA import *
 from KNN_scrpt import *
 from SVM_Script import *
 from KNN_scrpt import *
+from Decision_Tree_script import *
+from LR_script import *
+from RF_script import *
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score
+from sklearn.preprocessing import StandardScaler
+import altair as alt
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+
+
+
+
+
 st.set_page_config(layout="wide")
 df=pd.read_csv("hcc_dataset.csv")# Abrir o data-set
 
@@ -22,30 +39,33 @@ Trabalho realizado por:
 
 ******
 
-## <font size="40">0.Introdução</font>
+# 0. Introdução
 
-Neste projeto, o propósito é abordar um caso real do conjunto de dados do Carcinoma Hepatocelular (HCC). O referido conjunto de dados HCC foi coletado no Centro Hospitalar e Universitário de Coimbra (CHUC) em Portugal, e consiste em dados clínicos reais de pacientes diagnosticados com HCC.<br>
+O `Carcinoma Hepatocelular (HCC)` surge do mesmo processo de destruição e multiplicação de células que leva à cirrose. É um tumor altamente maligno que apresenta uma taxa de crescimento exponencial, dobrando o seu tamanho a cada 180 dias (em média). Um tumor deste tipo mesmo em fase inicial do seu desenvolvimento condena o seu portador a uma esperança de vida de 8 meses. Já no seu estágio avançado, é expectável que o paciente viva por mais 3 meses. Este é um problema real que assuta muitos pacientes e famílias, mas a maior preocupação clínica é o `desconhecimento das causas e parâmetros deste desenvolvimento anormal`, operando no paciente como um assassino silencioso.
 
-O objetivo primordial deste projeto é desenvolver um algoritmo SML (Supervised Machine Learning) capaz de determinar a possibilidade de sobrevivencia dos pacientes após 1 ano do diagnóstico (por exemplo, "sobrevive" ou "falece"). <br>
-Os métodos de Machine learning que iremos utilizar são:
+É devido a este desconhecimento que a medicina alia-se à ciência de dados pela busca de certezas. Quanto mais se conhecer sobre, mais rápida a atuação preventiva será. O rápido diagnóstico de um paciente pode ser o fator decisivo para que este sobreviva.
+
+Debruçados sobre este cenário, comprometemo-nos ao objetivo primordial de desenvolver um `algoritmo SML (Supervised Machine Learning)` para classificar os doentes após 1 ano diagnóstico em dois possíveis resultados: `Sobrevive ou Morre`. A amostra deste estudo é um conjunto de dados - `dataset` - do `Centro Hospitalar e Universitário de Coimbra (CHUC)`.
+
+Para o desenvolvimento algorítmico de Supervised Machine Learning, iremos ter por base os seguintes métodos:
+-colocar metodos que utilizamos-
+
 * KNN
 * Decision Tree
-* Random Forest(debativel)
-* SVM(debativel)
-* Logistic Regression(debativel)
+* Random Forest
+* Logistic Regression
+<br><br>
             
-            
-            
-### 0.1 Código do projeto
-A base do código envolve a criação de uma classe ``Dataset`` que contém métodos para a identificação de missing values, outliers etc.
-É o ``coração do projeto `` e foi utilizado ao longo de todo seu percurso. 
-Em todos os passos irão estar presentes ``snippets de código`` que foram utilizados para a resolução do problema.<br>
-            
-Para esclarecer como a classe Dataset foi construída, eis o respetivo código inicial (BuilderData e _init_):  
-            
+### 0.1 Sobre o estudo
 
+Tipicamente como data science é trabalhada, todo o código implementado foi desenvolvido em `Jupyter Notebook`.
+ 
+Alguns trechos de código ser-lhe-ão apresentados ao longo do desta documentação, os quais são baseado numa `Class` que criamos chamada `Dataset`. Para além do foco primário do projeto, desejavamos que qualquer dataset pudesse ser convertido num `DataFrame` e que, posteriormente, pudesse ser processado e polido segundo os métodos que desenhamos,a fim a alimentar um algoritmo de machine learning.
+
+Segue-se um exemplar da definição `init` e do construtor `BuilderData`:  
+                      
+   
 ''',unsafe_allow_html=True)
-
 st.code('''
         class Dataset:
             def __init__(self, df, missing_values):
@@ -70,27 +90,129 @@ st.code('''
 
 
 
-''', language="python")
+''', language="python")  
+st.markdown('''
+            ********
+
+<br><br>                  
+# 1. Data Mining
+
+Talvez o processo mais importante de todo o estudo. Um dos grandes problemas que qualquer data scientist enfrenta é crua forma como os dados são-lhe apresentados. Analogamente, suponhamos que o data set inicial é um minério ouro recém estraído, o qual tem pedaços de outras rochas e impurezas ao seu redor. O trabalho do mineiro é, entre outros, limpar, polir e extrair o máximo de ouro daquele minério: o nosso trabalho não é diferente. Uma boa data análise reproduz um bom resultado final. É nos encarregue analisar os dados, a forma como estes são apresentados e estão representados, relacionar variáveis, lidar com valores em falta, etc.
+
+Neste projeto, no data set `hcc_dataset.csv`, cada `linha` do seu DataFrame representa `um conjunto de caraterísticas de um paciente`, e cada `coluna` representa uma caraterística singular, que chamar-lhes-emos de `atributo` ou `feature`. Estas caraterísticas no contexto do problema são a forma como o doente lidou com o carcinoma, desde caso manifestou `sintomas` até aos níveis de `hemoglobina` ou `ferro`. Conta-se `165 pacientes` com `50 atributos` diferentes, dos quais `27 categóricos` e `23 numéricos`.
+
+Eis o `DataFrame` do nosso dataset: <br> ''',unsafe_allow_html=True)
+
+DF=Dataset.builderData('hcc_dataset.csv', "?")  
+st.dataframe(DF.df, height=840, use_container_width=False)  # Tabela da media
+
+
+
+
+
+st.markdown(''' <br>    
+Assim, de modo a ultrapassarmos esta fase corretamente, decidimos que a nossa `data analysis` guiar-se-ia pelos seguintes aspetos:
+
+* Estatisticas descritivas básicas
+* Análise de Variáveis
+* Missing Values
+* Outliers''',unsafe_allow_html=True)
+            
+            
+            
+
+
+
+
+
 
 st.markdown('''       
             *******
-<br><br>
-## <font size="40">1.Data-prep</font>
-Conforme a página avança iremos exibir os nossos passos *step-by-step* em como resolvemos este problema e aplicamo-lo
-Para uma boa análise de dados, é essencial uma boa preparação dos dados, logo foi decidido que iriamos dividir esta parte do projeto nas seguintes partições:
-* Missing values
-* Identificação de outliers 
-* Análise de variaveis 
-* Estatisticas descritivas 
-
 <br>
-Em cada tópico iremos extrair as nossas conclusões e explicá-las conformalmente.
             
-### 1.1 Missing values
-Foi necessário identificar os missing values no data-set, de modo a eliminar certas variáveis com percentagens de missing values muito altas. Assim será mais fácil de prever os valores das variáveis restantes. 
-            
+## 1.1 Estatísticas Descritivas básicas
+
+Um dos sistemas mais simples, no entanto dos mais efetivos, é a realização de uma `análise descritiva` de cada atributo. Entende-se por `estatísticas descritivas básicas` as seguintes estatísticas que são apenas aplicáveis a features com valores numéricas:
+
+- Média
+- Mediana
+- Desvio Padrão
+- Assimetria
+- Curtose
+
+Abaixo encontra-se tabelas que exprimem uma estatistica de um determinado atributo, bem como uma descrição suscinta da importância de cada estatística:
+
         
 ''',unsafe_allow_html=True)
+
+col10,col1,col6,col2,col7,col3,clo8,col4,col9,col5,col11= st.columns(spec=[0.05,0.08,0.0225,0.08,0.02250,0.1,0.0225,0.08,0.02250,0.08,0.05])
+
+with col1:#grafico da media
+
+    col1.header("Média")
+    st.markdown("<br>", unsafe_allow_html=True)
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela = data.df_num().mean(numeric_only=True).to_frame("")
+    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
+
+with col2:#grafico da media
+
+    col2.header("Mediana")
+    st.markdown("<br>", unsafe_allow_html=True)
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela = data.df_num().median(numeric_only=True).to_frame("")
+    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
+
+with col3:#grafico desvio padrao
+
+    col3.header("Desvio Padrão")
+    st.markdown("<br>", unsafe_allow_html=True)
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela = data.df_num().std(numeric_only=True).to_frame("")
+    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
+
+with col4:#grafico da media
+
+    col4.header("Assimetria")
+    st.markdown("<br>", unsafe_allow_html=True)
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela = data.df_num().skew(numeric_only=True).to_frame("")
+    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
+
+with col5:#grafico da media
+    col5.header("Curtose")
+    st.markdown("<br>", unsafe_allow_html=True)
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela = data.df_num().kurtosis(numeric_only=True).to_frame("")
+    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
+
+
+st.markdown('''
+<br><br>
+* `Média`: representa o valor central dos valores de cada atibuto, muito útil para resumir grandes quantidades de dados num único valor
+
+* `Mediana`: útil para entender a têndencia central dos dados, especialmente quando há valores muito extremos fora de padrão `(outliers)`, pois não é afetada por eles como a média
+
+* `Desvio Padrão`: Indica o grau de dispersão dos dados. Um desvio padrão alto significa que os dados estão espalhados em uma ampla gama de valores, enquanto um desvio padrão baixo indica que os valores estão próximos da média
+
+* `Assimetria`: Ajuda a entender a distribuição dos dados. Uma distribuição assimétrica pode indicar a presença de outliers ou a necessidade de uma transformação dos dados.
+
+* `Curtose`: Informa sobre a forma da distribuição dos dados, ajudando a identificar a presença de picos acentuados ou distribuições mais uniformes. Isso pode ser útil para análises estatísticas mais aprofundadas e para a modelagem de dados.
+<br><br>    
+            
+## 1.2 Missing Values 
+
+Os missing values são valores de um dado atributo dos quais se desconhece o seu valor real. Ao trabalhar com dados de larga escala, é perfeitamente comum que alguns valores sejam desconhecidos e, por isso, abordagem a este problema é fulcral para o bom funcionamento do algoritmo de Machine Lerning. Ao longo deste capítulo queremos que entenda a nossa linha de pensamento e a forma como abordamos esta questão. 
+
+Resumidamente, o primeiro passo e mais simplório é a `identificação visual dos missing values`. Aqui dispõe do DataFrame com os `missing values` devidamente assinalados e também de um gráfico de barras que denota a quantidade de variáveis por atributo:           
+            
+            
+            
+           '''  ,unsafe_allow_html=True)
+
+
+
+
 
 
 
@@ -136,11 +258,165 @@ st.code('''
         return missing_values_percentages.tolist()#retornar a percentagem de missing values''', language="python")
 
 st.markdown('''
+<br><br><br>
+            
+### 1.2.1 Tratamento de Missing Values (HEOM)
+<br>
+            
+Agora com os missing values identificados, podemos debruçar a nossa atenção sobre em como inputar os possíveis valores de cada missing value de uma feature.
+
+Inicialmente, e como já deve ter passado pela cabeça de qualquer um, julgamos que a substituição dos missing values seria adequada pela `média` ou `mediana`. Embora este método não implicasse porblemas futuros no algoritmo de Machine Learning, este método tem um grande prejuízo: a perca de variabilidade dos dados. Nada garante que o verdadeiro valor do missing value inputado semelhante à média ou à mediana, e por isso, o sistema de classificação final ficaria como um cavalo com palas: restrito a um "campo de visão" muito curto.
+
+Por isso, acreditamos que a melhor forma de imputação de missing values fosse por `Heterogeneous Euclidean-Overlap Metric`, ou `HEOM`.Passamos a explicar:
 <br>
 
-******
+	O Manel tem seu valor da Hemoglobina em falta;
+	A forma como o Manel manifestou a doença é bastante semelhante à forma da Joana, do João e do Pedro.
+	Então será de se esperar que o valor da Hemoglobina do Manel seja (no mínimo) semelhante à média dos valores da Joana, do João e do Pedro.
 
-### 1.2 Identificação de outliers
+Ou seja, em traços gerais, podemos imputar um missing value de um atributo de um paciente se calcularmos a distância entre pacientes por HEOM, sinalizarmos os "x" --meter em bonito escrito a mao tipo varivel-- pacientes mais próximos, fizermos a média dos valores do determinado atributo dos pacientes e atribuirmos o valor da média ao missing value. Protemos que soa mais complicado do que realmente é.
+
+Este método calcula a distância entre dois pacientes diferentes pela sua semelhança entre cada atributo de ambos. Vejamos como funciona esta métrica.  
+>Neste primeiro passo inicia-se uma tripla condição:
+>* Se x ou y são desconhecidos, a distância é 1
+>* Se a coluna ``a`` é categórica, faz-se um cálculo simples de overlap das variáveis .
+>* Por fim se a coluna ``a`` é numérica, calcula-se a diferença relativa entre x e y na função rn_diff.
+            
+            ''', unsafe_allow_html=True)   
+
+st.latex(r'''
+d_a(x, y) = 
+\begin{cases} 
+1 & \text{se} x \text{ ou } y \text{ é desconhecido; else} \\
+\text{overlap}(x, y) & \text{se } a \text{ é categórico,else} \\
+\text{rn\_diff}_a(x, y) & \text{senão}
+\end{cases}
+''')
+st.markdown('''
+    <br><br>
+            
+    >Como as variáveis são categóricas só as podemos avaliar quanto à sua igualdade: ``iguais`` ou ``difentes``. Por isso esta funçao é apenas um calculo binario básico .
+
+ ''', unsafe_allow_html=True)
+
+st.latex(r'''
+overlap(x, y) = 
+\begin{cases} 
+0 & \text{se } x = y \\
+1 & \text{senão}
+\end{cases}
+''')
+
+st.markdown('''
+    <br><br>
+            
+    >Nas variáveis numéricas pode-se fazer um desvio relativo entre as variáveis x e y. Assim o valor é reparemetrizado e evitar disperção de valores e aplicar uma avaliação justa.''', unsafe_allow_html=True)
+
+st.latex(r'''\text{rn\_diff}_a(x, y) = \frac{|x-y|}{\text{range}_a}
+''')
+
+st.latex(r'''\text{range}_a(x, y) = \text{max}_a - \text{min}_a''')
+#codigo para os calculos utilizados na metrica HEOM
+st.markdown('''<br><br>
+            
+>Finalmente, aplica-se fórmula final que faz o calculo Euclideano em todas as distancias que conclui assim a fórmula HEOM. 
+
+''', unsafe_allow_html=True)
+st.latex(r'''\text{HEOM}(x, y) = \sqrt{\sum_{a=1}^{m} d_a(x_a, y_a)^2}
+''')
+st.markdown('''
+<br>
+            
+Este Cálculo é muito demorado devido a todas as suas operações. Só neste Dataset existem 50 variáveis que têm de ser comparadas entre cada par de pacientes.
+<br>
+
+Todos estes loops contribuem para um aumento da *Time complexity* que acaba por resultar  <span style="color: red; font-weight: bold;">${O_n(n^2*m)}$</span> no qual n é o nr de pacientes e m o número de variáveis . <br>
+Agora, com a distancia entre cada paciente calculadado, podemos formar uma matriz que em cada célula contém o valor da distância entre dois pacientes. (Nota que a distancia entre os pacientes X , Y é a mesma que a distancia entre os pacientes Y , X - por isso não deve ser duplamente calculada)
+Abaixo encontra-se tal matriz: <br><br>''', unsafe_allow_html=True)
+Heom=Dataset.builderData("Tabela_HEOM.csv", "?")
+st.dataframe(Heom.df, height=840, use_container_width=False)  # Tabela da media
+st.markdown('''Eis o respetivo código:''',unsafe_allow_html=True)
+st.code('''
+    def tabelaHEOM(self):
+        self.df = self.replace_nan_with_none()#Trocar missing values para none
+        tabela = pd.DataFrame()
+        for i in range(len(self.df)):
+            lista = []
+            for j in range(len(self.df)):#Não interessa comparar pares de pacientes duas vezes
+                if i >= j:
+                    lista.append("X")# colocar x por motivos estéticos
+                else:
+                    lista.append(self.HEOM(i, j))# lista de um paciente em calculo HEOM
+
+            tabela = pd.concat([tabela, pd.DataFrame({i: lista})], axis=1)#adicionar a lista à tabela
+        return tabela
+    
+    def HEOM(self, paciente_1, paciente_2): #Heterogeneous Euclidean-Overlap Metric
+        soma = 0
+        for feature in self.df.columns:# iterar sobre as V
+            distancia = self.distanciaGeral(feature, paciente_1, paciente_2)# calcular a sua "distancia"
+            soma += distancia**2
+        soma= soma**(1/2)
+        return soma
+    
+    def distanciaGeral(self, feature:str, paciente_1:int, paciente_2:int)->int:
+        try :#Se a variavel for numerica vem para aqui
+            #distancia normalizada
+            valorPaciente_1 = float(self.df.loc[paciente_1, feature])
+            valorPaciente_2 = float(self.df.loc[paciente_2, feature])
+            numeric_feature = pd.to_numeric(self.df[feature], errors='coerce')
+            return abs(valorPaciente_1 - valorPaciente_2) / (numeric_feature.max() - numeric_feature.min())# retornar a range 
+        except :#Se a variavel for categorica vem para aqui
+            valorPaciente_1 = self.df.loc[paciente_1, feature]
+            valorPaciente_2 = self.df.loc[paciente_2, feature]
+            if valorPaciente_1 == valorPaciente_2 and  not pd.isna(valorPaciente_1):#Se forem iguais e não forem missing values
+                return 0
+            else: 
+                return 1
+
+''', language="python")
+st.markdown('''<br><br>
+### 1.2.2 Substituição de Missing Values
+<br>
+Texto explicativo sobre a substituição de missing values
+<br>
+            ''' ,unsafe_allow_html=True)
+
+Tabela_preenchida=Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
+st.dataframe(Tabela_preenchida.df, height=840, use_container_width=False)  # Tabela da media
+
+st.markdown('''<br><br> 
+Talvez um texto aqui''' ,unsafe_allow_html=True)
+col1, col2,col3,col4 = st.columns(spec=[0.2,0.2,0.2,0.4])
+with col2:
+    st.header("Tabela com missing values ")
+    data = Dataset.builderData("hcc_dataset.csv", "?")
+    tabela1 = data.df_num().mean().to_frame("Média")
+    st.dataframe(tabela1, height=840, use_container_width=False)  # Tabela da media
+
+with col3:
+    st.header("Tabela com missing values substituidos")
+    data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
+    tabela2 = data.df.mean(numeric_only=True).to_frame("")
+    st.dataframe(tabela2, height=840, use_container_width=False)  # Tabela da media
+with col4:
+    st.header("Desvio  Relativo (%)")
+    # Calculate the relative deviation
+    relative_deviation = (abs(tabela1.iloc[:, 0] - tabela2.iloc[:, 0]) / tabela1.iloc[:, 0]) * 100
+
+    # Convert the relative deviation to a DataFrame and name the column
+    relative_deviation = relative_deviation.to_frame("Desvio Relativo (%)")
+
+    # Display the relative deviation DataFrame
+    st.dataframe(relative_deviation, height=840)
+
+
+
+st.markdown('''
+            
+ ******
+
+# 1.2 Identificação de outliers
 Para identificar os outliers, foi necessário calcular o IQR (Interquartile Range) e os limites inferior e superior. Definimos os outliers para depois os saber agrupar usando ``KNN``. 
 
 
@@ -189,251 +465,34 @@ st.code('''
         styled_df = self.pintarOutliers(numeric_df, outliers)# Aplicar highlight aos outliers
 
         return styled_df''', language="python")
-st.markdown('''
-<br>
-            
-******
-            
-### 1.3 Estatísticas descritivas
-Neste tópico iremos analisar as estatísticas padrão do data-set para melhor entender os dados nos apresentados como:
-      
-    ''',unsafe_allow_html=True)
-
-col10,col1,col6,col2,col7,col3,clo8,col4,col9,col5,col11= st.columns(spec=[0.05,0.08,0.0225,0.08,0.02250,0.1,0.0225,0.08,0.02250,0.08,0.05])
-
-with col1:#grafico da media
-
-    col1.header("Média")
-    st.markdown("<br>", unsafe_allow_html=True)
-    data = Dataset.builderData("hcc_dataset.csv", "?")
-    tabela = data.df_num().mean(numeric_only=True).to_frame("")
-    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
-
-with col2:#grafico da media
-
-    col2.header("Mediana")
-    st.markdown("<br>", unsafe_allow_html=True)
-    data = Dataset.builderData("hcc_dataset.csv", "?")
-    tabela = data.df_num().median(numeric_only=True).to_frame("")
-    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
-
-with col3:#grafico desvio padrao
-
-    col3.header("Desvio Padrão")
-    st.markdown("<br>", unsafe_allow_html=True)
-    data = Dataset.builderData("hcc_dataset.csv", "?")
-    tabela = data.df_num().std(numeric_only=True).to_frame("")
-    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
-
-with col4:#grafico da media
-
-    col4.header("Assimetria")
-    st.markdown("<br>", unsafe_allow_html=True)
-    data = Dataset.builderData("hcc_dataset.csv", "?")
-    tabela = data.df_num().skew(numeric_only=True).to_frame("")
-    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
-
-with col5:#grafico da media
-    col5.header("Curtose")
-    st.markdown("<br>", unsafe_allow_html=True)
-    data = Dataset.builderData("hcc_dataset.csv", "?")
-    tabela = data.df_num().kurtosis(numeric_only=True).to_frame("")
-    st.dataframe(tabela, height=840, use_container_width=True)  # Tabela da media
-
-st.markdown('''
-<br>
-            
-******
-            
-### 1.3  Heterogeneous Euclidean-Overlap Metric (HEOM)
-Para Tratar de missng values, foi necessário calcular a distância entre dois pacientes, usando a métrica HEOM (Heterogeneous Euclidean-Overlap Metric).
-Esta métrica é usada para calcular a distância entre dois pacientes, mesmo que tenham diferentes tipos de variáveis(categóricas e numéricas).<br>
-<br><br>
-Este calculo baseia se todo em ``semelhanças`` que se relacionam em posteormente em ``distancias``. Quantas mais parecenças menos distantes. <br>
-<br><br>
-            
->Neste primeiro passo inicia-se uma tripla condição:
->* Se x ou y são desconhecidos, a distância é 1
->* Se a coluna ``a`` é categórica, faz-se um cálculo simples de overlap das variáveis .
->* Por fim se a coluna ``a`` é numérica, calcula-se a diferença relativa entre x e y na função rn_diff.
-      
-    ''',unsafe_allow_html=True)
-
-st.latex(r'''
-d_a(x, y) = 
-\begin{cases} 
-1 & \text{se} x \text{ ou } y \text{ é desconhecido; else} \\
-\text{overlap}(x, y) & \text{se } a \text{ é categórico,else} \\
-\text{rn\_diff}_a(x, y) & \text{senão}
-\end{cases}
-''')
-
-st.markdown('''
-    <br><br>
-            
-    >Como as variáveis são categóricas só as podemos avaliar quanto à sua igualdade: ``iguais`` ou ``difentes``. Por isso esta funçao é apenas um calculo binario básico .
-
- ''', unsafe_allow_html=True)
-
-st.latex(r'''
-overlap(x, y) = 
-\begin{cases} 
-0 & \text{se } x = y \\
-1 & \text{senão}
-\end{cases}
-''')
-
-st.markdown('''
-    <br><br>
-            
-    >Nas variáveis numéricas pode-se fazer um desvio relativo entre as variáveis x e y. Assim o valor é reparemetrizado e evitar disperção de valores e aplicar uma avaliação justa.''', unsafe_allow_html=True)
-
-st.latex(r'''\text{rn\_diff}_a(x, y) = \frac{|x-y|}{\text{range}_a}
-''')
-
-st.latex(r'''\text{range}_a(x, y) = \text{max}_a - \text{min}_a''')
-#codigo para os calculos utilizados na metrica HEOM
-st.markdown('''<br><br>
-            
->Finalmente, aplica-se formula final que faz o calculo Euclideano em todas as distancias que conclui assim a fórmula HEOM. 
-
-''', unsafe_allow_html=True)
-st.latex(r'''\text{HEOM}(x, y) = \sqrt{\sum_{a=1}^{m} d_a(x_a, y_a)^2}
-''')
-
-st.markdown('''
-Este Cálculo é muito demorado devido a todas as suas operações. Só neste Dataset existem 50 variáveis que têm de ser comparadas entre cada par de pacientes.
-             
-Todos estes loops contribuem para um aumento da *Time complexity* que acaba por resultar  <span style="color: red; font-weight: bold;">${O_n(n^2*m)}$</span> no qual n é o nr de variáveis e m o número de pacientes . <br>
-Eis a respetiva tabela HEOM: <br><br>''', unsafe_allow_html=True)
-
-st.code('''
-    def tabelaHEOM(self):
-        self.df = self.replace_nan_with_none()#Trocar missing values para none
-        tabela = pd.DataFrame()
-        for i in range(len(self.df)):
-            lista = []
-            for j in range(len(self.df)):#Não interessa comparar pares de pacientes duas vezes
-                if i >= j:
-                    lista.append("X")# colocar x por motivos estéticos
-                else:
-                    lista.append(self.HEOM(i, j))# lista de um paciente em calculo HEOM
-
-            tabela = pd.concat([tabela, pd.DataFrame({i: lista})], axis=1)#adicionar a lista à tabela
-        return tabela
-    
-    def HEOM(self, paciente_1, paciente_2): #Heterogeneous Euclidean-Overlap Metric
-        soma = 0
-        for feature in self.df.columns:# iterar sobre as V
-            distancia = self.distanciaGeral(feature, paciente_1, paciente_2)# calcular a sua "distancia"
-            soma += distancia**2
-        soma= soma**(1/2)
-        return soma
-    
-    def distanciaGeral(self, feature:str, paciente_1:int, paciente_2:int)->int:
-        try :#Se a variavel for numerica vem para aqui
-            #distancia normalizada
-            valorPaciente_1 = float(self.df.loc[paciente_1, feature])
-            valorPaciente_2 = float(self.df.loc[paciente_2, feature])
-            numeric_feature = pd.to_numeric(self.df[feature], errors='coerce')
-            return abs(valorPaciente_1 - valorPaciente_2) / (numeric_feature.max() - numeric_feature.min())# retornar a range 
-        except :#Se a variavel for categorica vem para aqui
-            valorPaciente_1 = self.df.loc[paciente_1, feature]
-            valorPaciente_2 = self.df.loc[paciente_2, feature]
-            if valorPaciente_1 == valorPaciente_2 and  not pd.isna(valorPaciente_1):#Se forem iguais e não forem missing values
-                return 0
-            else: 
-                return 1
-
-''', language="python")
 
 
-st.header("Tabela com missing values substituidos")
-data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
-st.dataframe(data.df, height=840, use_container_width=False)  # Tabela da media
-
-col1, col2,col3,col4 = st.columns(spec=[0.2,0.1,0.1,0.2])
-with col2:
-    st.header("Tabela com missing values ")
-    data = Dataset.builderData("hcc_dataset.csv", "?")
-    tabela1 = data.df_num().mean().to_frame("Média")
-    st.dataframe(tabela1, height=840, use_container_width=False)  # Tabela da media
-
-with col3:
-    st.header("Tabela com missing values substituidos")
-    data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
-    tabela2 = data.df.mean(numeric_only=True).to_frame("")
-    st.dataframe(tabela2, height=840, use_container_width=False)  # Tabela da media
-with col4:
-    st.header("Desvio  Relativo (%)")
-    # Calculate the relative deviation
-    relative_deviation = (abs(tabela1.iloc[:, 0] - tabela2.iloc[:, 0]) / tabela1.iloc[:, 0]) * 100
-
-    # Convert the relative deviation to a DataFrame and name the column
-    relative_deviation = relative_deviation.to_frame("Desvio Relativo (%)")
-
-    # Display the relative deviation DataFrame
-    st.dataframe(relative_deviation, height=840)
 
 
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_score
-from sklearn.preprocessing import StandardScaler
-import altair as alt
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 
-#inicializar o data-set
+
+
+
+st.header("Tabela com missing values substituidos por tratamento de outiliers")
 data = Dataset.builderData("Tabela_OT_antes_MV.csv", "?")
-data1= data.categorical_to_numerical()
-X = data1.drop(columns=['Class']).dropna()
-y = data1['Class']
+st.dataframe(data.df, height=840, use_container_width=False)  # Tabela da media
+st.markdown('''talvez um texto aqui''',unsafe_allow_html=True)  
 
-test_sizes = [0.1,0.15,0.20,0.25, 0.3,0.35, 0.4]  # List of different test sizes
-random_states = [42, 123, 456]  # List of different random states
-k_neighbors = range(1, 99)  # Range of k neighbors
+st.markdown('''
+<br><br>
+******
+# 2. Algoritmos de Supervised Machine Learning
+<br>
+texto explicativo sobre os algoritmos de machine learning 
+<br>
+## 2.1 Algoritmo KNN 
+<br>
+texto explicativo sobre o algoritmo KNN e utilização de PCA
+<br>''',unsafe_allow_html=True)            
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=456)
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
-knn = KNeighborsClassifier(n_neighbors=4)
-fit = knn.fit(X_train, y_train)
-accuracy = accuracy_score(y_test, fit.predict(X_test))
-
-
-#_______________________________________________________________________________________________________________________
-st.write('oladff')
-st.header("Gráfico de KNN vizinhos")
-tab1, tab2 = st.columns(spec=[0.5, 0.5])
-with tab1:
-    G_KNN_HP=Dataset.builderData("Grafico_KNN_HP_MV.csv", "?")
-    grafico_RG = alt.Chart(G_KNN_HP.df).mark_circle().encode(
-    x=alt.X('Accuracy:Q', scale=alt.Scale(domain=[0.0,0.7])),
-    y=alt.Y('Recall:Q', scale=alt.Scale(domain=[0.0,1.3])),
-    color=alt.Color('Neighbors:Q'),
-    size='Test Size:Q',
-    tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
-    ).interactive().properties(height=800)
-    st.altair_chart(grafico_RG, use_container_width=True)  
-with tab2:
-    G_KNN_HP=Dataset.builderData("Grafico_KNN_HP.csv", "?")
-    grafico_RG = alt.Chart(G_KNN_HP.df).mark_circle().encode(
-    x=alt.X('Accuracy:Q', scale=alt.Scale(domain=[0.0,0.7])),
-    y=alt.Y('Recall:Q', scale=alt.Scale(domain=[0.0,1.3])),
-    color=alt.Color('Neighbors:Q'),
-    size='Test Size:Q',
-    tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
-    ).interactive().properties(height=800)
-    st.altair_chart(grafico_RG, use_container_width=True)  
-#_______________________________________________________________________________________________________________________
-
-# Display the chart
 tab1, tab2 = st.tabs(['Tabela Missing values sem outliers', 'Tabela Missing values com outliers'])
 with tab1:
-    pca= Dataset.builderData("Grafico_PCA_MV.csv", "?")
+    pca= Dataset.builderData("Graficos\Grafico_PCA_MV.csv", "?")
     alt_c = alt.Chart(pca.df).mark_circle().encode(
     alt.X('PC1:Q', scale=alt.Scale(domain=[-5.5, 7.5])),
     alt.Y('PC2:Q',scale=alt.Scale(domain=[-6, 10])),
@@ -441,7 +500,7 @@ with tab1:
 ).interactive().properties(height=800)
     st.altair_chart(alt_c, use_container_width=True,theme=None)
 with tab2:
-    pca= Dataset.builderData("Grafico_PCA_OT_MV.csv", "?")
+    pca= Dataset.builderData("Graficos\Grafico_PCA_OT_MV.csv", "?")
     alt_c = alt.Chart(pca.df).mark_circle().encode(
     alt.X('PC1:Q', scale=alt.Scale(domain=[-5.5, 7.5])),
     alt.Y('PC2:Q',scale=alt.Scale(domain=[-6, 10])),
@@ -449,358 +508,239 @@ with tab2:
     ).interactive().properties(height=800)
     st.altair_chart(alt_c, use_container_width=True,theme=None)
 st.markdown('''<br>
-            
-Como sao muitas variaveis e muitos pacientes muita da data é perdida e por isso o grafico tender para esta forma linear. <br>
-Fizemos uma especie de Hyperparameter tuning para encontrar o melhor valor de K para o KNN. <br>            
-            ''',unsafe_allow_html=True)
+Conbluso sobre o PCA ''',unsafe_allow_html=True)            
+
+st.markdown('''<br><br>
+### 2.1.1 Aplicaçãoo do KNN 
+<br>
+texto explicativo sobre a aplicação do KNN e cross validation''' ,unsafe_allow_html=True)
+
+tab1,tab2,tab3,tab4 = st.tabs(['KNN hyperparameters com apenas tratamento de Missing Values','KNN hyperparameters com tratamento de Missing Values e Outliers','KNN cross validation com tratamento de Missing Values','KNN  cross validation com tratamento de Missing Values e Outliers'])
+
+with tab1:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony1 = st.selectbox(
+            "Eixo  y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx1 = st.selectbox(
+            "Eixo  x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=0)
+        opção_escolhiday = optiony1+":Q"
+        opção_escolhidax = optionx1+":Q"
+    with col1:
+
+        st.header("Gráfico KNN hyperparameters")
+        grafico1= Dataset.builderData("Graficos\Grafico_KNN_HP_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico1.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.86])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.15,1.3])),
+        color=alt.Color('Neighbors:Q'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
+        ).interactive().properties(height=800)
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab2:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=0)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico2= Dataset.builderData("Graficos\Grafico_KNN_HP_OT_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico2.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.86])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.15,1.3])),
+        color=alt.Color('Neighbors:Q'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
+        ).interactive().properties(height=800)
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab3:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony3 = st.selectbox(
+            "Eixo   y",(
+            tuple("Accuracy Precision Recall".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx3 = st.selectbox(
+            "Eixo   x",
+            (tuple("Accuracy Precision Recall".split())), index=0)
+        opção_escolhiday = optiony3+":Q"
+        opção_escolhidax = optionx3+":Q"
+    with col1:
+        grafico3= Dataset.builderData("Graficos\Grafico_KNN_CV_MV.csv", "?")    
+        grafico_KNN = alt.Chart(grafico3.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.585,0.770])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.7,1.08])),
+        color=alt.Color('N_Neighbors:Q'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','N_Neighbors','Recall']
+        ).interactive().properties(height=800)
+        st.altair_chart(grafico_KNN, use_container_width=True)
+
+with tab4:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony4 = st.selectbox(
+            "Eixo    y",(
+            tuple("Accuracy Precision Recall".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx4 = st.selectbox(
+            "Eixo    x",
+            (tuple("Accuracy Precision Recall ".split())), index=0)
+        opção_escolhiday = optiony4+":Q"
+        opção_escolhidax = optionx4+":Q"
+    with col1:
+        grafico4= Dataset.builderData("Graficos\Grafico_KNN_CV_OT_MV.csv", "?")    
+        grafico_KNN = alt.Chart(grafico4.df).mark_circle().encode(
+        x=alt.X('Accuracy:Q', scale=alt.Scale(domain=[0.585,0.770])),
+        y=alt.Y('Recall:Q', scale=alt.Scale(domain=[0.7,1.08])),
+        color=alt.Color('N_Neighbors:Q'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','N_Neighbors','Recall']
+        ).interactive().properties(height=800)
+
+        st.altair_chart(grafico_KNN, use_container_width=True)
+
+
+data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
+data1= data.categorical_to_numerical()
+X = data1.drop(columns=['Class']).dropna()
+y = data1['Class']
+
+st.markdown('''<br><br>
+Como funcionam os vizinhos mais proximos''' ,unsafe_allow_html=True)
+st.altair_chart( Grafico_vizinhos(X,y), use_container_width=True)
+
+
+test_sizes = [0.1,0.15,0.20,0.25, 0.3,0.35, 0.4]  # List of different test sizes
+random_states = [42, 123, 456]  # List of different random states
+k_neighbors = range(1, 99)  # Range of k neighbors
+
+
+
+
+
+tab5,tab6,tab7,tab8 = st.tabs(['Decision Tree hyperparameters com apenas tratamento de Missing Values','Decision Tree hyperparameters com tratamento de Missing Values e Outliers','Decision Tree cross validation com tratamento de Missing Values','Decision Tree  cross validation com tratamento de Missing Values e Outliers'])
+with tab5:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony1 = st.selectbox(
+            "Eixo     y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx1 = st.selectbox(
+            "Eixo     x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=0)
+        opção_escolhiday = optiony1+":Q"
+        opção_escolhidax = optionx1+":Q"
+    with col1:
+        st.header("Gráfico Decision Tree hyperparameters com trataemnto de Missing Values")
+        grafico5= Dataset.builderData("Graficos\Grafico_DC_HP_MV.csv", "?")
+        chart = alt.Chart(grafico5.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        color=alt.Color('Test_Size:N'),
+        size='Depth:N',
+        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity','Random_State']
+        ).interactive().properties(height=800)
+        st.altair_chart(chart, use_container_width=True)
+
+with tab6:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo      y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo      x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=0)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        st.header("Gráfico Decision Tree hyperparameters com tratamento de Missing Values e Outliers")
+        grafico5= Dataset.builderData("Graficos\Grafico_DC_HP_OT_MV.csv", "?")
+        chart = alt.Chart(grafico5.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        color=alt.Color('Test_Size:N'),
+        size='Depth:N',
+        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity','Random_State']
+        ).interactive().properties(height=800)
+        st.altair_chart(chart, use_container_width=True)
+
+with tab7:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo       y",(
+            tuple("Accuracy Precision Recall ".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo       x",
+            (tuple("Accuracy Precision Recall ".split())), index=0)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        st.header("Gráfico Decision Tree hyperparameters")
+        grafico6= Dataset.builderData("Graficos\Grafico_DC_CV_MV.csv", "?")
+        grafico_DC_CV = alt.Chart(grafico6.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        color=alt.Color('Depth:N'),
+        size=alt.value(600),
+        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall'])
+        st.altair_chart(grafico_DC_CV, use_container_width=True)
+
+with tab8:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo          y",(
+            tuple("Accuracy Precision Recall ".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo         x",
+            (tuple("Accuracy Precision Recall ".split())), index=0)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        st.header("Gráfico Decision Tree hyperparameters")
+        grafico7= Dataset.builderData("Graficos\Grafico_DC_CV_OT_MV.csv", "?")
+        grafico_DC_CV = alt.Chart(grafico7.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(zero=False)),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(zero=False)),
+        color=alt.Color('Depth:N'),
+        size=alt.value(600),
+        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall'])
+        st.altair_chart(grafico_DC_CV, use_container_width=True)
 
 
 
-#_______________________________________________________________________________________________________________________
-
-
-
-'''k_values = [i for i in range (1,100)]
-scores = []
-
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-for k in k_values:
-    knn = KNeighborsClassifier(n_neighbors=k)
-    score = cross_val_score(knn, X, y, cv=10, scoring='accuracy')
-    scores.append(np.mean(score))
-df_scores = pd.DataFrame({'K Values': k_values, 'Accuracy Score': scores})
-
-alt_c = alt.Chart(df_scores).mark_circle().encode(
-    alt.X('K Values:Q', scale=alt.Scale(zero=False)),
-    alt.Y('Accuracy Score:Q', scale=alt.Scale(domain=[0.5, 0.8]))
-).interactive().properties(height=800)'''
-alt_c= Grafico_vizinhos_CV(X,y,100)
-st.header("Gráfico de KNN por cross-validation antes de outliers 10 folds")
-st.altair_chart(alt_c, use_container_width=True)
-
-
-
-#_______________________________________________________________________________________________________________________
-
-
-
-results= Dataset.builderData("results_DCHP.csv", "?")
-# Create the Altair chart
-chart = alt.Chart(results.df).mark_circle().encode(
-    x=alt.X('Precision:Q', scale=alt.Scale(zero=False)),
-    y=alt.Y('Accuracy:Q', scale=alt.Scale(zero=False)),
-    color=alt.Color('Test_Size:N'),
-    size='Depth:N',
-    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision']
-).interactive().properties(height=800)
-
-# Display the chart
-st.header("Gráfico de Decision Tree por Hyperparameter antes de outliers")
-st.altair_chart(chart, use_container_width=True, theme=None)
-
-
-
-#_______________________________________________________________________________________________________________________
-
-
-
-from sklearn.model_selection import cross_val_score
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-
-# Assuming X is your feature set and y is the target variable
-# X, y = load_your_data()
-
-# Standardize the features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-# Define the parameter ranges
-depths = range(6, 14)
-min_samples_splits = range(2, 11)
-min_samples_leafs = range(1, 11)
-
-# Initialize an empty list to store the results
-results_list = []
-
-# Loop over the parameter ranges
-for depth in depths:
-    for min_samples_split in min_samples_splits:
-        for min_samples_leaf in min_samples_leafs:
-            # Create the classifier
-            clf = DecisionTreeClassifier(max_depth=depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf)
-
-            # Perform cross-validation
-            cv_scores = cross_val_score(clf, X, y, cv=5)
-
-            # Store the results
-            results_list.append({
-                'Mean_CV_Score': cv_scores.mean(),
-                'Std_CV_Score': cv_scores.std(),
-                'Depth': depth,
-                'Min_Samples_Split': min_samples_split,
-                'Min_Samples_Leaf': min_samples_leaf
-            })
-
-# Convert the list of results into a DataFrame
-resultados_DC_CV = pd.DataFrame(results_list)
-grafico_DC_CV = alt.Chart(resultados_DC_CV).mark_circle().encode(
-    x=alt.X('Mean_CV_Score:Q', scale=alt.Scale(zero=False)),
-    y=alt.Y('Std_CV_Score:Q', scale=alt.Scale(zero=False)),
-    color=alt.Color('Depth:N'),
-    size=alt.value(600),
-    tooltip=['Mean_CV_Score', 'Std_CV_Score', 'Depth', 'Min_Samples_Split', 'Min_Samples_Leaf']
-).interactive().properties(height=800)
-st.header("Gráfico de Decision Tree por Cross-Validation antes de outliers")
-st.altair_chart(grafico_DC_CV, use_container_width=True, theme=None)
-
-
-
-#_______________________________________________________________________________________________________________________
-
-
-
-from sklearn.model_selection import GridSearchCV
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-import numpy as np
-
-# Assuming X is your feature set and y is the target variable
-# X, y = load_your_data()
-
-# Standardize the features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-# Define the parameter grid
-param_grid = {
-    'max_depth': np.arange(1, 11),
-    'min_samples_split': np.arange(2, 11),
-    'min_samples_leaf': np.arange(1, 11)
-}
-
-# Create the classifier
-clf = DecisionTreeClassifier()
-
-# Create the GridSearchCV object
-grid_search = GridSearchCV(clf, param_grid=param_grid, cv=5)
-
-# Fit the GridSearchCV object to the data
-grid_search.fit(X, y)
-
-# Get the best parameters
-best_params = grid_search.best_params_
-
-# Get the best score
-best_score = grid_search.best_score_
-
-# Create a DataFrame to store the best results
-results = pd.DataFrame([best_params])
-results['Best_Score'] = best_score
-
-# Display the results
-print(results)
-
-
-
-#_______________________________________________________________________________________________________________________
-
-
-
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-import numpy as np
-
-# Assuming X is your feature set and y is the target variable
-# X, y = load_your_data()
-
-# Standardize the features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-# Define the parameter grid
-param_grid = {
-    'max_depth': np.arange(1, 11),
-    'min_samples_split': np.arange(2, 11),
-    'min_samples_leaf': np.arange(1, 11)
-}
-
-# Create the classifier
-clf = DecisionTreeClassifier()
-
-# Create the RandomizedSearchCV object
-random_search = RandomizedSearchCV(clf, param_distributions=param_grid, n_iter=1000, cv=5, random_state=456)
-
-# Fit the RandomizedSearchCV object to the data
-random_search.fit(X, y)
-
-cv_results = random_search.cv_results_
-
-# Create a DataFrame to store the best results
-results = pd.DataFrame(cv_results).sort_values('rank_test_score')
-st.dataframe(results)
-
-
-
-#_______________________________________________________________________________________________________________________
-
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, precision_score
-import pandas as pd
-
-# Assume X is your features and y is your target
-test_sizes = [ 0.15 , 0.2 , 0.25 , 0.3 , 0.35 , 0.4 , 0.45 , 0.5]
-random_states = [12, 23, 35, 47, 52, 58, 63, 75, 84, 92, 101, 112, 118, 25, 99]
-weights = ['balanced', None]
-
-results = []
-
-for test_size in test_sizes:
-    for random_state in random_states:
-        for weight in weights:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-
-            # Initialize the Logistic Regression model
-            model = LogisticRegression(class_weight=weight)
-
-            # Fit the model to the training data
-            model.fit(X_train, y_train)
-
-            # Use the model to make predictions on unseen data
-            predictions = model.predict(X_test)
-
-            # Calculate accuracy and precision
-            accuracy = accuracy_score(y_test, predictions)
-            precision = precision_score(y_test, predictions)
-
-            # Append results to the results list
-            results.append({
-                'Accuracy': accuracy,
-                'Precision': precision,
-                'Test Size': test_size,
-                'Random State': random_state,
-                'Weight': weight
-            })
-
-# Convert results to DataFrame
-results_df = pd.DataFrame(results)
-st.dataframe(results_df)
-grafico_RG = alt.Chart(results_df).mark_circle().encode(
-    x=alt.X('Precision:Q', scale=alt.Scale(zero=False)),
-    y=alt.Y('Accuracy:Q', scale=alt.Scale(zero=False)),
-    color='Weight:N',
-    size='Test Size',
-    tooltip=['Accuracy','Precision','Test Size','Random State','Weight']
-).interactive().properties(height=800)
-st.header("Gráfico de Logistic Regression por Hyperparameter depois de outliers")
-st.altair_chart(grafico_RG, use_container_width=True, theme=None)
-#_______________________________________________________________________________________________________________________
-
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-import numpy as np
-
-# Assuming X is your feature set and y is the target variable
-# X, y = load_your_data()
-
-# Standardize the features
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-# Define the parameter grid
-param_grid = {
-    'C': np.logspace(-4, 4, 20),
-    'penalty': ['l1', 'l2'],
-    'solver': ['liblinear'],
-    'class_weight': ['balanced', None],
-    'random_state': [42, 52, 62]
-}
-
-# Create the classifier
-clf = LogisticRegression()
-
-# Create the GridSearchCV object
-grid_search = GridSearchCV(clf, param_grid=param_grid, cv=5)
-
-# Fit the GridSearchCV object to the data
-grid_search.fit(X, y)
-
-# Get the cross-validation results
-cv_results = grid_search.cv_results_
-
-# Lines 714-729: Your existing code
-
-# Convert the results to a DataFrame and reset the index
-results_df = pd.DataFrame(cv_results).reset_index()
-
-# Display the results
-st.dataframe(results_df)
-import altair as alt
-
-
-
-# Rename the 'index' column to 'row_index' to avoid confusion
-results_df = results_df.rename(columns={'index': 'row_index'})
-
-# Now you can use 'row_index' in your Altair chart
-heatmap = alt.Chart(results_df).mark_circle().encode(
-    x=alt.X('mean_test_score:Q', scale=alt.Scale(domain=[0.60, 0.80])),  # Use the row index as the x-axis
-    y=alt.Y('std_test_score:Q', scale=alt.Scale(domain=[0.02, 0.1])),  # Use the mean_test_score as the y-axis
-    color='param_C:N',
-    size=alt.value(300),
-    tooltip=['param_C', 'param_class_weight', 'param_penalty', 'param_random_state', 'mean_test_score', 'std_test_score']
-).interactive().properties(height=800)
-
-# Display the heatmap
-st.altair_chart(heatmap, use_container_width=True, theme=None)
-
-#_______________________________________________________________________________________________________________________\
-
-
-from sklearn.metrics import precision_score
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import StandardScaler
-import pandas as pd
-import altair as alt
-
-results= Dataset.builderData("results_DCHP.csv", "?")
-
-# Create the Altair chart
-chart = alt.Chart(results).mark_circle().encode(
-    x=alt.X('Precision:Q', scale=alt.Scale(zero=False)),
-    y=alt.Y('Recall:Q', scale=alt.Scale(zero=False)),
-    color=alt.Color('Test_Size:N'),
-    size='Depth:N',
-    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity']
-).interactive().properties(height=800)
-
-# Display the chart
-st.header("Gráfico de Decision Tree por Hyperparameter depois de outliers precisão vs recall")
-st.altair_chart(chart, use_container_width=True, theme=None)
-#_______________________________________________________________________________________________________________________\
-
-# Create the Altair chart
-chart = alt.Chart(results).mark_circle().encode(
-    x=alt.X('Specificity:Q', scale=alt.Scale(zero=False)),
-    y=alt.Y('Recall:Q', scale=alt.Scale(zero=False)),
-    color=alt.Color('Test_Size:N'),
-    size='Depth:N',
-    tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Test_Size','Accuracy', 'Precision', 'Recall','Specificity']
-).interactive().properties(height=800)
-
-# Display the chart
-st.header("Gráfico de Decision Tree por Hyperparameter depois de outliers especificidade vs recall")
-st.altair_chart(chart, use_container_width=True, theme=None)
