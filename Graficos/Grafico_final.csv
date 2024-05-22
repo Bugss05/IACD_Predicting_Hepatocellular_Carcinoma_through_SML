@@ -1,0 +1,5 @@
+Accuracy,Precision,Recall,Specificity							
+Random Forest,86.2,90.2,90.2,76.4							
+Logistic Regression,83.3,89.7,86.7,75							
+K-Nearest Neighbours,78.6,88.9,80.8,75							
+Decision Tree,88,92.9,86.7,90							
