@@ -54,7 +54,7 @@ class Dataset:
         return df.style.apply(lambda x: highlight_value(x, x.name), axis=0)#Aplicar a função a cada coluna
     
 
-    def tabelaHEOM(self):
+    def tabelaHEOM(self)->pd.DataFrame:
         self.df = self.replace_nan_with_none()#Trocar missing values para none
         tabela = pd.DataFrame()
         for i in range(len(self.df)):
@@ -69,7 +69,7 @@ class Dataset:
         return tabela
     
 
-    def HEOM(self, paciente_1, paciente_2): #Heterogeneous Euclidean-Overlap Metric
+    def HEOM(self, paciente_1:int, paciente_2:int)->int: #Heterogeneous Euclidean-Overlap Metric
         soma = 0
         for feature in self.df.columns:# iterar sobre as V
             distancia = self.distanciaGeral(feature, paciente_1, paciente_2)# calcular a sua "distancia"
@@ -94,132 +94,129 @@ class Dataset:
                 return 1
     
 
-    def outliers(self,info:str,vizinhos=None)->pd.DataFrame:
-        # Selecionar apenas as colunas numéricas
-        categorical_features = self.remove_int_columns() 
-        numeric_df = self.df_num()
+    def outliers(self,info:str,vizinhos:int=None)->pd.DataFrame:
+        categorical_features = self.remove_int_columns() #selecionar as colunas categoricas
+        numeric_df = self.df_num()  #selecionar as colunas numericas
 
         colunas_numericas = numeric_df.columns
         if info == 'style':
             outliers = set()
-        for coluna in colunas_numericas:#calcular os outliers usando o IQR
+        for coluna in colunas_numericas: #calcular os outliers usando o IQR
             if info == 'tratamento':
                 outliers = []
-            q1 = numeric_df[coluna].quantile(0.25)
+            q1 = numeric_df[coluna].quantile(0.25) #calculo de quartis
             q3 = numeric_df[coluna].quantile(0.75)
             iqr = q3 - q1
-            limite_inferior = q1 - 1.5 * iqr
+            limite_inferior = q1 - 1.5 * iqr #calculo de limites (acima de superior ou abaixo de inferior = outliers)
             limite_superior = q3 + 1.5 * iqr
-            for index, value in numeric_df[coluna].items():#adicionar outliers ao set
-                if value < limite_inferior or value > limite_superior:
-                    if info == 'tratamento' and coluna not in ["Iron", "Sat", "Ferritin"]:
-                        if self.df.loc[index, coluna] > limite_superior * 5 or self.df.loc[index, coluna] < limite_inferior * 5:
+            for index, value in numeric_df[coluna].items(): #adicionar outliers ao set
+                if value < limite_inferior or value > limite_superior: # identificação de outliers
+                    if info == 'tratamento' and coluna not in ["Iron", "Sat", "Ferritin"]: #drop de colunas com mais de 35% missing values
+                        if self.df.loc[index, coluna] > limite_superior * 1.5 or self.df.loc[index, coluna] < limite_inferior * 1.5:
                             outliers.append((index, coluna))
                     elif info == 'style':
                         outliers.add((coluna, index))
             if info == 'tratamento':
                 self.df= self.tratamentoOutliers(outliers, coluna,vizinhos)
         if info == 'style':
-            # Apply styling to outliers
-            styled_df = self.pintarOutliers(numeric_df, outliers)
+            styled_df = self.pintarOutliers(numeric_df, outliers) # Pintar os outliers
             return styled_df
         if info == 'tratamento': 
             self.df = (pd.concat([categorical_features,self.df ], axis=1))
             return self.df
     
     
-    def tratamentoOutliers(self, outliers, coluna,vizinhos):
-        
-        lista_valores = self.df[coluna].tolist()#todos os valores da coluna 
+    def tratamentoOutliers(self, outliers, coluna, vizinhos): #substituir os outliers pela média dos k vizinhos mais proximos
+        lista_valores = self.df[coluna].tolist() #todos os valores da coluna 
         contador = -1
-        valores_out = [self.df.loc[index,coluna] for index,coluna in outliers]#valores dos outliers
-        for valor_outlier in valores_out:# iterar por todos os outliers
+        valores_out = [self.df.loc[index,coluna] for index,coluna in outliers] #valores dos outliers
+        for valor_outlier in valores_out: #iterar por todos os outliers
             contador+=1
             outlier = valor_outlier
             dicionario_distancias = []
             for valor in lista_valores:
-
+                #o valor so e valido se nao for um far outlier e nao for um missing value
                 if outlier != valor and valor not in valores_out and not pd.isna(valor):
 
-                    distancia = self.HEOM(lista_valores.index(valor), lista_valores.index(outlier))#calcular a distancia entre o outlier e os outros valores
-                    if len(dicionario_distancias) < vizinhos:
+                    distancia = self.HEOM(lista_valores.index(valor), lista_valores.index(outlier)) #calcular a distancia entre o outlier e os outros valores
+                    if len(dicionario_distancias) < vizinhos: # se o numero de valores na heap for menor que o numero de vizinhos, adicionar o valor
                         heapq.heappush(dicionario_distancias, (-distancia, valor))
                     else:
-                        if -distancia > dicionario_distancias[0][0]:
+                        if -distancia > dicionario_distancias[0][0]: #se a distancia for maior que o valor mais pequeno na heap, substituir o valor
                             heapq.heapreplace(dicionario_distancias, (-distancia, valor))
 
-            k_proximos = [abs(item[1]) for item in dicionario_distancias]# selecionar os k vizinhos mais proximos
+            k_proximos = [abs(item[1]) for item in dicionario_distancias] #selecionar os k vizinhos mais proximos
             
             media = sum(k_proximos)/len(k_proximos)
-            self.df.loc[outliers[contador][0], coluna] = media
+            self.df.loc[outliers[contador][0], coluna] = media # imputaçao do ajuste no dataframe original
         return self.df
-
 
     def fill_missing_values(self, nr_vizinhos:int) -> pd.DataFrame:
 
-        self.df = self.replace_nan_with_none() # Replace missing values with None 
+        self.df = self.replace_nan_with_none() # Trocar missing values para None 
 
-        self.df = self.df.drop(['Iron', 'Sat', 'Ferritin'], axis=1)# Drop unnecessary columns
-        df_copiada = self.df.copy()# Create a copy of the DataFrame
+        self.df = self.df.drop(['Iron', 'Sat', 'Ferritin'], axis=1)# Eliminar colunas desnecessárias
+        df_copiada = self.df.copy()# Criar uma copia do dataframe
 
-        for i in range(len(self.df)): # Iterate over each row
+        for i in range(len(self.df)): #iterar por todas as linhas
             row = self.df.iloc[i]
             
-            if row.isnull().any():# Check if the row has any missing values
-                closest_rows = self.linhas_mais_proximas(nr_vizinhos, i)# Get the indices of the closest rows
+            if row.isnull().any():# Ver se essa linha tem missing values
+                closest_rows = self.linhas_mais_proximas(nr_vizinhos, i)# Calcular as linhas mais proximas
     
-                for col in self.df.columns:# Iterate over each column
-                    if pd.isnull(row[col]): # If the value is missing, replace it with the most common value or mean from the closest rows
+                for col in self.df.columns:# Iterar por todas as colunas
+                    if pd.isnull(row[col]): # Se a célula for um missing value substituir na tabela o valor
                         df_copiada.loc[i, col] = self.subs_na_tabela(closest_rows, col,nr_vizinhos,i)
         return df_copiada
     
-
-    def subs_na_tabela(self, closest_rows:list, col:int,vizinhos,i)->float | str :
-        # Initialize values
-        column_values = []
-
-        for row_index in closest_rows:
-            try:
-                # Check the type of values
-                value = float(self.df.loc[row_index, col])
-            except:
-                value = self.df.loc[row_index, col]
-
-            if value is not None and not pd.isna(value):
-                column_values.append(value)
-        if len(column_values) == 0:
-
-            return self.subs_na_tabela(self.linhas_mais_proximas(vizinhos+1,i), col,vizinhos+1,i)
-        # Calculate the result based on the type of values
-        if isinstance(column_values[0], str):
-
-            # If values are strings, return the most frequent value
-            return max(set(column_values), key=column_values.count)
-        elif isinstance(column_values[0], (int, float)):
-
-            # If values are numeric, return the mean
-            return np.mean(column_values)
-        
-
-    def linhas_mais_proximas(self, vizinhos:int,i:int)->list: # Calculate the HEOM distance for each other row
+    def linhas_mais_proximas(self, vizinhos:int,i:int)->list: # Calcular as linhas mais proximas por cálculo HEOM e retornar as linhas mais próximas
        
         heom_values = []
 
         for j in range(len(self.df)):
 
             if j != i:
-                heom_distance = self.HEOM(i, j)# Calculate the HEOM distance
-                if len(heom_values) < vizinhos: # If we have less than 'vizinhos' distances, we add it to the heap
+                heom_distance = self.HEOM(i, j)# Calcular a distância HEOM entre as linhas
+                if len(heom_values) < vizinhos: # Se o número de valores na heap for menor que o número de vizinhos, adicionamos o valor
 
                     heapq.heappush(heom_values, (-heom_distance, j))
                 else:
-                    if -heom_distance > heom_values[0][0]: # If the current distance is smaller than the largest distance in the heap, we replace it
+                    if -heom_distance > heom_values[0][0]:#Se a distância for maior que o valor mais pequeno na heap, substituímos o valor
                         heapq.heapreplace(heom_values, (-heom_distance, j))
     
-        # Get the rows with the smallest HEOM distance
+        # Selecionar as linhas mais próximas
         closest_rows = [item[1] for item in heom_values]
 
-        return closest_rows
+        return closest_rows    
+
+    def subs_na_tabela(self, closest_rows:list, col:int,vizinhos,i)->float | str :
+
+        column_values = []
+
+        for row_index in closest_rows:
+            try:#Ver se a tabela é numérica ou categórica
+
+                value = float(self.df.loc[row_index, col])
+            except:
+                value = self.df.loc[row_index, col]
+
+            if value is not None and not pd.isna(value):#Se o valor não for None, adicionamos à lista
+                column_values.append(value)
+        if len(column_values) == 0:
+
+            return self.subs_na_tabela(self.linhas_mais_proximas(vizinhos+1,i), col,vizinhos+1,i)#Se não houver valores na lista, aumentamos o número de vizinhos e calcula se outra vez até encontrar 
+        
+        if isinstance(column_values[0], str):
+
+            # Se os valores forem strings retornar a moda
+            return max(set(column_values), key=column_values.count)
+        elif isinstance(column_values[0], (int, float)):
+
+            # Se o valor for numérico retornar a média
+            return np.mean(column_values)
+        
+
+
     
 
     def categorical_to_numerical(self):
