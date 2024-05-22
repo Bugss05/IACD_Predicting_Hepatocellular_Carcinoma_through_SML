@@ -647,7 +647,7 @@ with tab1:
         grafico_RG = alt.Chart(grafico1.df).mark_circle().encode(
         x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.86])),
         y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.15,1.3])),
-        color=alt.Color('Neighbors:Q'),
+        color=alt.Color('Neighbors:N'),
         size='Test Size:Q',
         tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
         ).interactive().properties(height=800)
@@ -672,7 +672,7 @@ with tab2:
         grafico_RG = alt.Chart(grafico2.df).mark_circle().encode(
         x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.86])),
         y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.15,1.3])),
-        color=alt.Color('Neighbors:Q'),
+        color=alt.Color('Neighbors:N'),
         size='Test Size:Q',
         tooltip=['Accuracy','Precision','Test Size','Random State','Neighbors','Weight','Metric','Recall','Specificity']
         ).interactive().properties(height=800)
@@ -697,7 +697,7 @@ with tab3:
         grafico_KNN = alt.Chart(grafico3.df).mark_circle().encode(
         x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.585,0.770])),
         y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.7,1.08])),
-        color=alt.Color('N_Neighbors:Q'),
+        color=alt.Color('N_Neighbors:N'),
         size='Test Size:Q',
         tooltip=['Accuracy','Precision','Test Size','Random State','N_Neighbors','Recall']
         ).interactive().properties(height=800)
@@ -720,9 +720,9 @@ with tab4:
     with col1:
         grafico4= Dataset.builderData("Graficos\Grafico_KNN_CV_OT_MV.csv", "?")    
         grafico_KNN = alt.Chart(grafico4.df).mark_circle().encode(
-        x=alt.X('Accuracy:Q', scale=alt.Scale(domain=[0.585,0.770])),
-        y=alt.Y('Recall:Q', scale=alt.Scale(domain=[0.7,1.08])),
-        color=alt.Color('N_Neighbors:Q'),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.585,0.770])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.7,1.08])),
+        color=alt.Color('N_Neighbors:N'),
         size='Test Size:Q',
         tooltip=['Accuracy','Precision','Test Size','Random State','N_Neighbors','Recall']
         ).interactive().properties(height=800)
@@ -819,11 +819,11 @@ with tab7:
         st.header("Gráfico Decision Tree hyperparameters")
         grafico6= Dataset.builderData("Graficos\Grafico_DC_CV_MV.csv", "?")
         grafico_DC_CV = alt.Chart(grafico6.df).mark_circle().encode(
-        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
-        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.64,0.76])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.61,0.76])),
         color=alt.Color('Depth:N'),
         size=alt.value(600),
-        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall'])
+        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall']).interactive().properties(height=800)
         st.altair_chart(grafico_DC_CV, use_container_width=True)
 
 with tab8:
@@ -844,17 +844,17 @@ with tab8:
         st.header("Gráfico Decision Tree hyperparameters")
         grafico7= Dataset.builderData("Graficos\Grafico_DC_CV_OT_MV.csv", "?")
         grafico_DC_CV = alt.Chart(grafico7.df).mark_circle().encode(
-        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
-        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.64,0.74])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.61,0.76])),
         color=alt.Color('Depth:N'),
         size=alt.value(600),
-        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall'])
+        tooltip=['Depth', 'Min_Samples_Split', 'Min_Samples_Leaf', 'Accuracy', 'Precision', 'Recall']).interactive().properties(height=800)
         st.altair_chart(grafico_DC_CV, use_container_width=True)
 
 
 st.markdown('''
-br><br>
-
+<br><br>
+### 2.2 Algoritmo Decision Tree
 talvez um texto aqui 
 
 eis as nossa Decision trees ''' ,unsafe_allow_html=True)
@@ -866,3 +866,230 @@ with tab9:
     st.image('best_DC_HP_OT_MD.png', caption='Decision Tree com tratamento de Missing Values')
 with tab10:
     st.image('DC_OT_MV.png', caption='Decision Tree com tratamento de Missing Values e Outliers')
+
+st.markdown('''
+## 2.3 Logistic regression 
+Texto aqui 
+            
+            
+            
+            
+            
+            
+            
+            ''',unsafe_allow_html=True)
+
+
+tab11,tab12,tab13,tab14 = st.tabs(['Logistic Regression hyperparameters com apenas tratamento de Missing Values','Logistic Regression hyperparameters com tratamento de Missing Values e Outliers','Logistic Regression cross validation com tratamento de Missing Values','Logistic Regression  cross validation com tratamento de Missing Values e Outliers'])
+with tab11:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony1 = st.selectbox(
+            "Eixo       y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx1 = st.selectbox(
+            "Eixo       x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=1)
+        opção_escolhiday = optiony1+":Q"
+        opção_escolhidax = optionx1+":Q"
+    with col1:
+        grafico6= Dataset.builderData("Graficos\Grafico_LR_HP_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico6.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.92])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
+        color=alt.Color('C:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','C','Penalty','Solver','Class Weight','Recall','Specificity']
+        ).interactive().properties(height=800).interactive()
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab12:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo         y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo         x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=1)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico7= Dataset.builderData("Graficos\Grafico_LR_HP_OT_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico7.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.36,0.92])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.3,1.1])),
+        color=alt.Color('C:Q'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','C','Penalty','Solver','Class Weight','Recall','Specificity']
+        ).interactive().properties(height=800).interactive()
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab13:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo           y",(
+            tuple("Accuracy Precision Recall ".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo           x",
+            (tuple("Accuracy Precision Recall ".split())), index=1)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico7= Dataset.builderData("Graficos\Grafico_LR_CV_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico7.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.65,0.89])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.52,0.88])),
+        color=alt.Color('C:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','C','Penalty','Solver','Class Weight','Recall']
+        ).interactive().properties(height=800).interactive()
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab14:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo               y",(
+            tuple("Accuracy Precision Recall ".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo              x",
+            (tuple("Accuracy Precision Recall ".split())), index=1)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico8= Dataset.builderData("Graficos\Grafico_LR_CV_OT_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico8.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.65,0.89])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.52,0.88])),
+        color=alt.Color('C:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','C','Penalty','Solver','Class Weight','Recall']
+        ).interactive().properties(height=800).interactive()
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+st.markdown('''
+conclusoed sobre o logistic regression
+*******
+            
+
+
+
+<br><br>
+## 2.5 Random Forest
+Texto aqui       
+            ''',unsafe_allow_html=True)
+
+tab15,tab16,tab17,tab18 = st.tabs(['Random Forest hyperparameters com apenas tratamento de Missing Values','Random Forest hyperparameters com tratamento de Missing Values e Outliers','Random Forest cross validation com tratamento de Missing Values','Random Forest  cross validation com tratamento de Missing Values e Outliers'])
+with tab15:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony1 = st.selectbox(
+            "Eixo                  y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx1 = st.selectbox(
+            "Eixo                  x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=1)
+        opção_escolhiday = optiony1+":Q"
+        opção_escolhidax = optionx1+":Q"
+    with col1:
+        grafico14= Dataset.builderData("Graficos\Grafico_RF_HP_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico14.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.4,0.94])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.5,1.1])),
+        color=alt.Color('N_Estimators:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','N_Estimators','Class Weight','Recall','Specificity']
+        ).interactive().properties(height=800)
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab16:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo                             y",(
+            tuple("Accuracy Precision Recall Specificity".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo                              x",
+            (tuple("Accuracy Precision Recall Specificity".split())), index=1)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico9= Dataset.builderData("Graficos\Grafico_RF_HP_OT_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico9.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.4,0.94])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.5,1.1])),
+        color=alt.Color('N_Estimators:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','N_Estimators','Class Weight','Recall','Specificity']
+        ).interactive().properties(height=800)  
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab17:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo                                      y",(
+            tuple("Accuracy Precision Recall ".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo                                      x",
+            (tuple("Accuracy Precision Recall ".split())), index=1)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico11= Dataset.builderData("Graficos\Grafico_RF_CV_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico11.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.65,0.84])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.6,0.98])),
+        color=alt.Color('N_Estimators:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','N_Estimators','Class Weight','Recall']
+        ).interactive().properties(height=800)
+        st.altair_chart(grafico_RG, use_container_width=True)
+
+with tab18:
+    col1, col2,col3 = st.columns(spec=[0.85,0.05, 0.1])
+    #inicializar o data-set
+    with col3:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        optiony2 = st.selectbox(
+            "Eixo                                             y",(
+            tuple("Accuracy Precision Recall ".split())), index=2)
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        optionx2 = st.selectbox(
+            "Eixo                                              x",
+            (tuple("Accuracy Precision Recall ".split())), index=1)
+        opção_escolhiday = optiony2+":Q"
+        opção_escolhidax = optionx2+":Q"
+    with col1:
+        grafico12= Dataset.builderData("Graficos\Grafico_RF_CV_OT_MV.csv", "?")
+        grafico_RG = alt.Chart(grafico12.df).mark_circle().encode(
+        x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.65,0.84])),
+        y=alt.Y(opção_escolhiday, scale=alt.Scale(domain=[0.6,0.98])),
+        color=alt.Color('N_Estimators:N'),
+        size='Test Size:Q',
+        tooltip=['Accuracy','Precision','Test Size','Random State','N_Estimators','Class Weight','Recall']
+        ).interactive().properties(height=800)
+        st.altair_chart(grafico_RG, use_container_width=True)
