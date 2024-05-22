@@ -47,7 +47,7 @@ Para o desenvolvimento algorítmico de Supervised Machine Learning, iremos ter p
 * Logistic Regression
 <br><br>
             
-### 0.1 Sobre o estudo
+### 0.1. Sobre o estudo
 
 Tipicamente como data science é trabalhada, todo o código implementado foi desenvolvido em `Jupyter Notebook`.
  
@@ -144,7 +144,7 @@ st.markdown('''
             *******
 <br>
             
-## 1.1 Estatísticas Descritivas básicas
+## 1.1. Estatísticas Descritivas básicas
 
 Um dos sistemas mais simples, no entanto dos mais efetivos, é a realização de uma `análise descritiva` de cada atributo. Entende-se por `estatísticas descritivas básicas` as seguintes estatísticas que são apenas aplicáveis a features com valores numéricas:
 
@@ -213,8 +213,8 @@ st.markdown('''
 
 * `Curtose`: Informa sobre a forma da distribuição dos dados, ajudando a identificar a presença de picos acentuados ou distribuições mais uniformes. Isso pode ser útil para análises estatísticas mais aprofundadas e para a modelagem de dados.
 <br><br>    
-            
-## 1.2 Missing Values 
+*******            
+## 1.2. Missing Values 
 
 Os missing values são valores de um dado atributo dos quais se desconhece o seu valor real. Ao trabalhar com dados de larga escala, é perfeitamente comum que alguns valores sejam desconhecidos e, por isso, abordagem a este problema é fulcral para o bom funcionamento do algoritmo de Machine Lerning. Ao longo deste capítulo queremos que entenda a nossa linha de pensamento e a forma como abordamos esta questão. 
 
@@ -274,7 +274,7 @@ st.code('''
 st.markdown('''
 <br><br><br>
             
-### 1.2.1 Tratamento de Missing Values (HEOM)
+### 1.2.1. Tratamento de Missing Values (HEOM)
 <br>
             
 Agora com os missing values identificados, podemos debruçar a nossa atenção sobre em como inputar os possíveis valores de cada missing value de uma feature.
@@ -333,7 +333,7 @@ st.latex(r'''\text{range}_a(x, y) = \text{max}_a - \text{min}_a''')
 #codigo para os calculos utilizados na metrica HEOM
 st.markdown('''<br><br>
             
->Finalmente, aplica-se fórmula final que faz o calculo Euclideano em todas as distancias que conclui assim a fórmula HEOM. 
+>Finalmente, aplica-se fórmula final que faz o cálculo Euclideano em todas as distâncias que conclui assim a fórmula HEOM. 
 
 ''', unsafe_allow_html=True)
 st.latex(r'''\text{HEOM}(x, y) = \sqrt{\sum_{a=1}^{m} d_a(x_a, y_a)^2}
@@ -341,11 +341,11 @@ st.latex(r'''\text{HEOM}(x, y) = \sqrt{\sum_{a=1}^{m} d_a(x_a, y_a)^2}
 st.markdown('''
 <br>
             
-Este Cálculo é muito demorado devido a todas as suas operações. Só neste Dataset existem 50 variáveis que têm de ser comparadas entre cada par de pacientes.
+Este cálculo é muito demorado devido a todas as suas operações. Só neste Dataset existem 50 variáveis que têm de ser comparadas entre cada par de pacientes.
 <br>
 
-Todos estes loops contribuem para um aumento da *Time complexity* que acaba por resultar  <span style="color: red; font-weight: bold;">${O_n(n^2*m)}$</span> no qual n é o nr de pacientes e m o número de variáveis . <br>
-Agora, com a distancia entre cada paciente calculadado, podemos formar uma matriz que em cada célula contém o valor da distância entre dois pacientes. (Nota que a distancia entre os pacientes X , Y é a mesma que a distancia entre os pacientes Y , X - por isso não deve ser duplamente calculada)
+Todos estes loops contribuem para um aumento da *Time complexity* que acaba por resultar  <span style="color: red; font-weight: bold;">${O_n(n^2*m)}$</span> no qual n é o número de pacientes e m o número de variáveis . <br>
+Agora, com a distância entre cada paciente calculadada, podemos formar uma matriz que em cada célula contém o valor da distância entre dois pacientes. (Nota que a distância entre os pacientes X , Y é a mesma que a distância entre os pacientes Y , X - por isso não deve ser duplamente calculada)
 Abaixo encontra-se tal matriz: <br><br>''', unsafe_allow_html=True)
 Heom=Dataset.builderData("Tabela_HEOM.csv", "?")
 st.dataframe(Heom.df, height=840, use_container_width=False)  # Tabela da media
@@ -392,10 +392,16 @@ st.code('''
 
 ''', language="python")
 st.markdown('''<br><br>
-### 1.2.2 Substituição de Missing Values
+### 1.2.2. Substituição de Missing Values
 <br>
-Texto explicativo sobre a substituição de missing values
-<br>
+Calculada a distância entre todos os pacientes, podemos substituir um qualquer missing values segundo as seguintes diretrizes:
+
+* Média (features numéricas) ou moda (features categóricas) dos 3 pacientes mais próximos 
+* Caso 1 ou 2 dos 3 pacientes mais próximos tenham na feature a substituir `missing values`, substituir pela média/moda  dos restantes 
+* Caso todos os 3 pacientes tenham a feature a substituir como `missing value`, encontrar o próximo paciente mais proximo que a sua feature tenha um valor diferente de missing value 
+
+Assim, o DataFrame com os missing values imputados apresenta-se assim:
+<br><br><br>
             ''' ,unsafe_allow_html=True)
 
 Tabela_preenchida=Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
@@ -473,21 +479,22 @@ st.code('''
 
 
 st.markdown('''<br><br> 
-Talvez um texto aqui''' ,unsafe_allow_html=True)
+Os efeitos do tratamento do missing values pode ser medido através do desvio relativo percentual entre as médias das features antes e depois do tratamento. <br> 
+Observe:''' ,unsafe_allow_html=True)
 col1, col2,col3,col4 = st.columns(spec=[0.2,0.2,0.2,0.4])
 with col2:
-    st.header("Tabela com missing values ")
+    st.header("Médias antes do tratamento")
     data = Dataset.builderData("hcc_dataset.csv", "?")
     tabela1 = data.df_num().mean().to_frame("Média")
     st.dataframe(tabela1, height=840, use_container_width=False)  # Tabela da media
 
 with col3:
-    st.header("Tabela com missing values substituidos")
+    st.header("Médias depois do tratamento")
     data = Dataset.builderData("Tabela_sem_missing_values_3.csv", "?")
-    tabela2 = data.df.mean(numeric_only=True).to_frame("")
+    tabela2 = data.df.mean(numeric_only=True).to_frame("Media")
     st.dataframe(tabela2, height=840, use_container_width=False)  # Tabela da media
 with col4:
-    st.header("Desvio  Relativo (%)")
+    st.header("Desvio relativo (%)")
     # Calculate the relative deviation
     relative_deviation = (abs(tabela1.iloc[:, 0] - tabela2.iloc[:, 0]) / tabela1.iloc[:, 0]) * 100
 
@@ -503,11 +510,14 @@ st.markdown('''
             
  ******
 
-# 1.2 Identificação de outliers
-Para identificar os outliers, foi necessário calcular o IQR (Interquartile Range) e os limites inferior e superior. Definimos os outliers para depois os saber agrupar usando ``KNN``. 
+# 1.3. Ajuste dos outliers <br><br>
+Os outliers são valores que apresentam dispersões elevadas face a distribuição dos dados de uma feature. É, portanto, um alvo de preocupação no processo de data mining pois 
+provoca um desvio na classificação do modelo de Machine Learning, porque os dados não aparentam um padrão consistente. A falta de um padrão definido nos dados pode levar a um aumento da incerteza das previsões, comprometendo a precisão do modelo. Portanto, garantir a integridade e a qualidade dos dados de entrada é crucial para o desempenho confiável de modelos de Machine Learning. <br><br>
 
+## 1.3.1. Identificação visual dos outliers <br>
 
-
+Primeiramente, definimos que um valor seria outlier se respeita-se as seguintes condições:
+<br><br>
 
 ''',unsafe_allow_html=True)
 st.latex(r'''\begin{align*}
@@ -517,64 +527,118 @@ st.latex(r'''\begin{align*}
 \text{Outlier se} & \quad x < Q1 - 1.5 \times \text{IQR} \quad \lor \quad x > Q3 + 1.5 \times \text{IQR}
 \end{align*}''')
 
+st.markdown('''<br>
+            
+Assim, podemos observar a existência de outliers entre cada feature na seguinte tabela:
+''',unsafe_allow_html=True)
+
 
 data = Dataset.builderData(df, "?")
-st.header("Tabela de Outliers")
+st.header("Tabela com outliers identificados")
 
 grafico_outliers= data.outliers('style')
 st.dataframe(grafico_outliers, height=900,use_container_width=True)#Tabela de Outliers
 st.markdown('''
-Apesar dos outliers representarem valores fora do normal decidimos nao os altdulterar pois estes valores representam diversidade de dados e podem ser importantes para a previsão de sobrevivencia dos pacientes num caso de resultados semelhantes.<br>
+
 Eis o respetivo código:
-
-
-
 
 ''',unsafe_allow_html=True)
 
 st.code('''    
-    def outliers(self):
-        # Selecionar apenas as colunas numéricas
-        numeric_df = self.df_num()
+    def outliers(self,info:str,vizinhos:int=None)->pd.DataFrame:
+        categorical_features = self.remove_int_columns() #selecionar as colunas categoricas
+        numeric_df = self.df_num()  #selecionar as colunas numericas
 
         colunas_numericas = numeric_df.columns
-        outliers = set()
-        for coluna in colunas_numericas:#calcular os outliers usando o IQR
-            q1 = numeric_df[coluna].quantile(0.25)
+        if info == 'style':
+            outliers = set()
+        for coluna in colunas_numericas: #calcular os outliers usando o IQR
+            if info == 'tratamento':
+                outliers = []
+            q1 = numeric_df[coluna].quantile(0.25) #calculo de quartis
             q3 = numeric_df[coluna].quantile(0.75)
             iqr = q3 - q1
-            limite_inferior = q1 - 1.5 * iqr
+            limite_inferior = q1 - 1.5 * iqr #calculo de limites (acima de superior ou abaixo de inferior = outliers)
             limite_superior = q3 + 1.5 * iqr
-            for index, value in numeric_df[coluna].items():#adicionar outliers ao set
-                if value < limite_inferior or value > limite_superior:
-                    outliers.add((coluna, index))
+            for index, value in numeric_df[coluna].items(): #adicionar outliers ao set
+                if value < limite_inferior or value > limite_superior: # identificação de outliers
+                    if info == 'tratamento' and coluna not in ["Iron", "Sat", "Ferritin"]: #drop de colunas com mais de 35% missing values
+                        if self.df.loc[index, coluna] > limite_superior * 1.5 or self.df.loc[index, coluna] < limite_inferior * 1.5:
+                            outliers.append((index, coluna))
+                    elif info == 'style':
+                        outliers.add((coluna, index))
+            if info == 'tratamento':
+                self.df= self.tratamentoOutliers(outliers, coluna,vizinhos)
+        if info == 'style':
+            styled_df = self.pintarOutliers(numeric_df, outliers) # Pintar os outliers
+            return styled_df
+        if info == 'tratamento': 
+            self.df = (pd.concat([categorical_features,self.df ], axis=1))
+            return self.df
+    
+    
+    def tratamentoOutliers(self, outliers, coluna, vizinhos): #substituir os outliers pela média dos k vizinhos mais proximos
+        lista_valores = self.df[coluna].tolist() #todos os valores da coluna 
+        contador = -1
+        valores_out = [self.df.loc[index,coluna] for index,coluna in outliers] #valores dos outliers
+        for valor_outlier in valores_out: #iterar por todos os outliers
+            contador+=1
+            outlier = valor_outlier
+            dicionario_distancias = []
+            for valor in lista_valores:
+                #o valor so e valido se nao for um far outlier e nao for um missing value
+                if outlier != valor and valor not in valores_out and not pd.isna(valor):
 
-        styled_df = self.pintarOutliers(numeric_df, outliers)# Aplicar highlight aos outliers
+                    distancia = self.HEOM(lista_valores.index(valor), lista_valores.index(outlier)) #calcular a distancia entre o outlier e os outros valores
+                    if len(dicionario_distancias) < vizinhos: # se o numero de valores na heap for menor que o numero de vizinhos, adicionar o valor
+                        heapq.heappush(dicionario_distancias, (-distancia, valor))
+                    else:
+                        if -distancia > dicionario_distancias[0][0]: #se a distancia for maior que o valor mais pequeno na heap, substituir o valor
+                            heapq.heapreplace(dicionario_distancias, (-distancia, valor))
 
-        return styled_df''', language="python")
+            k_proximos = [abs(item[1]) for item in dicionario_distancias] #selecionar os k vizinhos mais proximos
+            
+            media = sum(k_proximos)/len(k_proximos)
+            self.df.loc[outliers[contador][0], coluna] = media # imputaçao do ajuste no dataframe original
+        return self.df''', language="python")
 
+st.markdown('''
+<br><br>
+## 1.3.2. Parametrização e ajuste dos outliers mais dispersos
 
+Um dos focos primordiais da nossa data analysis é evitar a perda de variabilidade, pois provocará o enviesamento dos dados. Por isso, cientes do peso da dispersão dos outliers nos algoritmos de Machine Learning, decidimos distinguir os outliers em dois grupos:
+<br><br>
+> `Outliers poucos disperos`: outliers que não ultrapassem 1.5 x limite (inferior ou superior). <br>
+>`Outliers muito dispersos`: outlier que ultrapassem estes tetos.
 
-
-
-
-
+Assim, iremos proceder à correção apenas dos `outliers muito dispersos` pois são estes os responsáveis pelo adulteramento dos resultados dos algoritmos de ML. Manter `outliers poucos dispersos` priviligia a diversidade da amostra sem comprometer o output dos algoritmos. Parceu-nos, portanto, uma abordagem bastante interessante.
+<br><br>
+Sendo assim, iremos reaproveitar o método de imputação de missing values por HEOM e utilizar para ajustar os outliers. Abaixo encontra-se o DataFrame com os outlier devidamente ajustados:
+<br><br>
+''',unsafe_allow_html=True)
 
 st.header("Tabela com missing values substituidos por tratamento de outiliers")
 data = Dataset.builderData("Tabela_OT_antes_MV.csv", "?")
 st.dataframe(data.df, height=840, use_container_width=False)  # Tabela da media
-st.markdown('''talvez um texto aqui''',unsafe_allow_html=True)  
+st.markdown('''
+> <b>Nota de esclarecimento</b>: apresenta-mos-lhe o DataFrame com os outliers muito dispersos ajustados e também com as variáveis categóricas convertidas em numéricas (um método da Class criamos e que pode ser conferida no ficheiro Jupyter Notebook deste estudo).
+<br>Escolhemos esta tabela, apesar de menos intuitiva, pois este será o DataFrame final que alimentará os algoritmos de Supervised Machine Learning desenvolvidos.
+''',unsafe_allow_html=True)  
 
 st.markdown('''
 <br><br>
 ******
 # 2. Algoritmos de Supervised Machine Learning
 <br>
-texto explicativo sobre os algoritmos de machine learning 
+
+Os algoritmos de aprendizagem supervisionada `Supervised Machine Learning` são métodos que utilizam dados rotulados para treinar modelos capazes de fazer previsões ou classificações. Durante o treino, o algoritmo aprende a mapear entradas (features) para as saídas (labels) corretas, ajustando os seus parâmetros internos para minimizar o erro entre as previsões do modelo e os valores reais.
+
+Quando confrontados com os gráficos resultantes de Hyperparameters dos vários algoritmos, surgiu a questão: que valores para os diferentes Hyperameters devemos escolher de modo a decisão seja `ótima`?<br>
+
+Para a decisão de qual algoritmo é mais ótimo tivemos por base, nomeadamente, os valores retornados de `Sensitivity (ou Recall)` e `Specificity` cujas fórmulas se apresentam abaixo:
+
 <br>
-Quando confrontados com os graficos resultantes de Hyperparameters dos vários algoritmos, surgiu a questão: como devemos escolher?
-Assim, para além de ter em conta aspetos como o `test_size` e `n_neighbors` (exemplos de parâmetros do KNN), procuramos implementar outras métricas, nomeadamente **Sensitivity** (ou **Recall**) e **Specificity** cujas formas se apresentam abaixo: <br>
-<br>
+
 ''',unsafe_allow_html=True)
 
 st.latex(r'''{\text{Specificity} = \frac{\text{True Negatives}}{\text{True Negatives} + \text{False Positives}}}''')
@@ -586,19 +650,18 @@ st.latex(r'''{\text{Sensitivity} = \frac{\text{True Positives}}{\text{True Posit
 st.markdown('''
 <br>
 
-Tal significa, portanto, que a Sensitivity representa, em termos leigos, "dos resultados positivos (`1` ou `"Lives"`), quantos foram analisados corretamente" e a Specificity "dos resultados negativos (`0` ou `"Dies"`), quantos foram analisados corretamente". <br>
+Em termos leigos, a Sensitivity representa "dos resultados positivos (`1` ou `"Lives"`), quantos foram analisados corretamente" e a Specificity "dos resultados negativos (`0` ou `"Dies"`), quantos foram analisados corretamente". <br>
 
 Ora, como sendo este um dataset representativo de um diagnóstico médico, é largamente preferível obter um falso positivo em vez de um falso negativo. Esse facto levou-nos a priorizar pontos que maximizem o Recall, garantindo que, um paciente que é, de facto, positivo, seja, categorizado como tal. <br>
 
-Logo, no sentido de definir os melhores parâmetros criamos o gráfico de Accuracy em função de Recall, e escolhemos o ponto mais próximo ao caso ideal (ou seja, o ponto `(1,1)` ). Atente no seguinte mencionado: <br>
+Irá encontrar a partir de agora o esquema como lidamos com o processo de criação de difrentes algortimos segundo o mesmo processo: escolher os melhores hyperparameters para um determinado algoritmo.<br>
 
+### Análise PCA
+`Análise de Componentes Principais` é uma técnica de redução de dimensionalidade que transforma os dados originais em um conjunto de componentes principais, que são combinações lineares das variáveis originais, capturando a maior variabilidade possível com menos dimensões. Assim, conseguimos ter uma melhor consideração sobre quais métodos computacionais devemos debruçar na nossa abordagem.
 
-## 2.1 Algoritmo KNN 
-<br>
-texto explicativo sobre o algoritmo KNN e utilização de PCA
 <br>''',unsafe_allow_html=True)            
 
-tab1, tab2 = st.tabs(['Tabela Missing values sem outliers', 'Tabela Missing values com outliers'])
+tab1, tab2 = st.tabs(['Tabela com tratamento de missing values', 'Tabela com tratamento de missing values e outliers'])
 with tab1:
     pca= Dataset.builderData("Graficos\Grafico_PCA_MV.csv", "?")
     alt_c = alt.Chart(pca.df).mark_circle().encode(
@@ -616,14 +679,24 @@ with tab2:
     ).interactive().properties(height=800)
     st.altair_chart(alt_c, use_container_width=True,theme=None)
 st.markdown('''<br>
-Conbluso sobre o PCA ''',unsafe_allow_html=True)            
+Como pode observar, ao comparar a distribuição espacial dos pontos antes e depois do ajuste dos outliers, os pontos reagurpar-se por cores, mostrando uma vez mais a eficácia e a importância de um bom tratamento de dados.
+''',unsafe_allow_html=True)            
 
 st.markdown('''
 <br><br>
+> Aqui abaixo irá encontrar os 4 algoritmos desenvolvidos:
+
+******
+## 2.1. K-Nearest Neighbors
+
+O algoritmo `K-Nearest Neighbours` (KNN) é um método de aprendizagem supervisionada utilizado para classificação e regressão, que baseia a sua operação na identificação dos "K" vizinhos mais próximos de um ponto de dados novo, determinando a sua classe ou valor com base nas características desses vizinhos. A simplicidade do KNN, que não assume qualquer forma específica para a distribuição dos dados, torna-o robusto e fácil de implementar. 
+
             
-###2.1.1 Aplicaçãoo do KNN 
+## 2.1.1 Aplicação do KNN 
 <br>
-texto explicativo sobre a aplicação do KNN e cross validation''' ,unsafe_allow_html=True)
+Para garantir a fiabilidade e a robustez do modelo KNN, é essencial aplicar a técnica de cross-validation (validação cruzada). A cross-validation divide o conjunto de dados em múltiplos subconjuntos ou folds; o modelo é treinado em alguns desses folds e testado nos restantes, garantindo que cada ponto de dados seja usado tanto para treino quanto para teste. Esta abordagem permite avaliar a performance do KNN de forma mais precisa e reduz o risco de overfitting, assegurando que o modelo generaliza bem para novos dados. 
+<br><br>
+''' ,unsafe_allow_html=True)
 
 tab1,tab2,tab3,tab4 = st.tabs(['KNN hyperparameters com apenas tratamento de Missing Values','KNN hyperparameters com tratamento de Missing Values e Outliers','KNN cross validation com tratamento de Missing Values','KNN  cross validation com tratamento de Missing Values e Outliers'])
 
@@ -735,11 +808,24 @@ data1= data.categorical_to_numerical()
 X = data1.drop(columns=['Class']).dropna()
 y = data1['Class']
 
-st.markdown('''<br><br>
-Como funcionam os vizinhos mais proximos''' ,unsafe_allow_html=True)
+st.markdown('''<br>
+
+### Score por número de vizinhos mais próximos escolhidos
+<br>
+''' ,unsafe_allow_html=True)
 st.altair_chart( Grafico_vizinhos(X,y), use_container_width=True)
 
+st.markdown('''
+Como seria de prever, à medida que o número de vizinhos aumenta, a <i>accuracy</i> tende para diminuir e estagnar. Para além disso, a concordância entre o melhor score de <i>accuracy</i> e um número `ímpar` de vizinhos (9 ou 11) credibiliza a aplicação deste algortimo - não há problemas de desempate.
+<br>
 
+******
+## 2.2. Decision Tree
+<br>
+
+Uma Decision Tree é uma ferramenta de Machine Learning ideal para problemas de classificação e regressão, a qual representa as suas decisões e suas possíveis consequências de forma gráfica e intuitiva. Uma das principais vantagens das árvores de decisão é a sua interpretabilidade, fazendo com que qualquer leigo a este tema seja capaz de seguir o caminho de decisão do algoritmo. Além disso, podem lidar com dados categóricos e numéricos, tornando-as bastante versáteis. 
+
+ ''' ,unsafe_allow_html=True)
 
 
 
@@ -759,7 +845,7 @@ with tab5:
         opção_escolhiday = optiony1+":Q"
         opção_escolhidax = optionx1+":Q"
     with col1:
-        st.header("Gráfico Decision Tree hyperparameters com trataemnto de Missing Values")
+        st.header("Gráfico Decision Tree hyperparameters com tratamento de Missing Values")
         grafico5= Dataset.builderData("Graficos\Grafico_DC_HP_MV.csv", "?")
         chart = alt.Chart(grafico5.df).mark_circle().encode(
         x=alt.X(opção_escolhidax, scale=alt.Scale(domain=[0.25,1.1])),
@@ -849,28 +935,23 @@ with tab8:
 
 st.markdown('''
 <br><br>
-### 2.2 Algoritmo Decision Tree
-talvez um texto aqui 
+### 2.2.1 Árvores obtidas por Decision Tree
 
-eis as nossa Decision trees ''' ,unsafe_allow_html=True)
+Imediatamente abaixo encontrará 2 árvores diferentes resultantes deste algoritmo.<br> Como pode aferir, o nosso data mining realizado torna o processo de decisão mais complexo, mais conciso e mais robusto, discriminando os dados mais recorrentemente.
+ ''' ,unsafe_allow_html=True)
 
 
 tab9,tab10 = st.tabs(['Decision Tree com apenas tratamento de Missing Values','Decision Tree com tratamento de Missing Values e Outliers'])
 
 with tab9:
-    st.image('best_DC_HP_OT_MD.png', caption='Decision Tree com tratamento de Missing Values')
+    st.image('treeImages/best_DC_HP_OT_MD.png', caption='Decision Tree com tratamento de Missing Values')
 with tab10:
-    st.image('DC_OT_MV.png', caption='Decision Tree com tratamento de Missing Values e Outliers')
+    st.image('treeImages/DC_OT_MV.png', caption='Decision Tree com tratamento de Missing Values e Outliers')
 
 st.markdown('''
+******
 ## 2.3 Logistic regression 
-Texto aqui 
-            
-            
-            
-            
-            
-            
+A regressão logística é uma técnica amplamente utilizada para modelar a probabilidade de ocorrência de um evento binário, neste caso `Lives` ou `Dies`, sendo particularmente eficaz neste ramo. Diferentemente da regressão linear, que prevê valores contínuos, a regressão logística prevê a probabilidade de uma variável dependente assumir um dos dois possíveis estados, munido-se sua simplicidade e interpretabilidade como grandes vantagens, permitindo facilmente compreender o impacto de cada variável independente no resultado final. <br> 
             
             ''',unsafe_allow_html=True)
 
@@ -977,15 +1058,11 @@ with tab14:
         st.altair_chart(grafico_RG, use_container_width=True)
 
 st.markdown('''
-conclusoed sobre o logistic regression
+
 *******
-            
-
-
-
-<br><br>
-## 2.5 Random Forest
-Texto aqui       
+## 2.4 Random Forest
+O Random Forest é um método de machine learning eficaz para classificação e regressão, que melhora a precisão preditiva e reduz o overfitting. Funciona criando múltiplas árvores de decisão a partir de amostras aleatórias do conjunto de dados e combina as suas previsões para obter um resultado final mais robusto. Cada árvore é construída considerando apenas uma amostra aleatória de características em cada divisão, o que aumenta a diversidade e reduz a correlação entre elas.
+   
             ''',unsafe_allow_html=True)
 
 tab15,tab16,tab17,tab18 = st.tabs(['Random Forest hyperparameters com apenas tratamento de Missing Values','Random Forest hyperparameters com tratamento de Missing Values e Outliers','Random Forest cross validation com tratamento de Missing Values','Random Forest  cross validation com tratamento de Missing Values e Outliers'])
@@ -1088,17 +1165,49 @@ with tab18:
         tooltip=['Accuracy','Precision','Test Size','Random State','N_Estimators','Class Weight','Recall']
         ).interactive().properties(height=800)
         st.altair_chart(grafico_RG, use_container_width=True)
-        
-
-st.markdown('''conclusoes
-*******
-''',unsafe_allow_html=True)
 
 
 st.markdown('''
-## 2.6 Conclusoes dos algoritmos
-texto aqui
-            
-eis as melhores accuracies dos algoritmos''',unsafe_allow_html=True)
+******
+## 2.6 Conclusões sobre a eficiência geral dos algoritmos
 
+Tomamos como medida de comparação os hyperameters mais ótimos testados de cada algoritmo para todos estarem em pé de igualdade. Para não tornar esta página mais massuda do que ela já está, apresentamos os resultados finais neste gráfico abaixo. <br>
+Eis a comparação do score de <i>accuracy</i>, <i>precision</i>, <i>recall</i>, <i>specificity</i>, em função de cada algoritmo aplicado, na sua ótima performance (valores em <b>%</b>):
+<br><br>
+''',unsafe_allow_html=True)
+
+graficoFinal = pd.read_csv("Graficos/Grafico_final.csv")
+
+col1, col2, col3 = st.columns([0.35,0.05,0.6])
+with col1:
+    st.dataframe(graficoFinal)
+with col3:
+    st.image("treeImages/graficoFinal.png")
+
+st.markdown('''<br><br>Por fim, após todos os processos documentados acima e feita a análise dos gráficos criados, chegamos a variadas conclusões de duas naturezas distintas: algumas analíticas, outras gráficas. Aqui estão:''',unsafe_allow_html=True)
+
+col1, col3, col2 = st.columns([0.48,0.04, 0.48])
+with col1:
+    st.markdown('''
+##### Analíticas
+* 10% de missing values no dataset torna-o debilitado, onde existem features com quase 50% de missing values
+* Outros métodos mais simples de imputação de missing values como substituição por mediana não prejudica a performance dos algoritmos mas provoca o seu enviesamento
+* Número de pacientes baixo resulta em algoritmos discrepantes entre si
+* O ajuste de outliers pode tanto beneficiar como prejudicar a performance do algoritmo, dependendo de qual é utilizado
+* Os algoritmos não beneficiam de Cross Validation
+* Um valor de Recall extremamente elevado não necessariamente implica um algoritmo fiável
+''', unsafe_allow_html=True)
+
+with col2:
+    st.markdown('''
+##### Gráficas
+* A mudança dos hyperparameters de cada algoritmo influência a
+performance do mesmo na classificação de doentes
+* Com hyperparameters ótimos, Decision Tree vence em Accuracy,
+Precision e Specificity, enquanto Random Forest vence em Recall
+* A distribuição de pontos no gráfico PCA melhorou
+significativamente após o tratamento de outliers
+* Não é possível estabelecer uma regressão linear no cálculo de
+PCA (principal component analysis), penalizando a Accuracy
+''', unsafe_allow_html=True)
 
