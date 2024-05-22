@@ -64,7 +64,7 @@ Caso ainda não o tenha feito, abrir um dos terminais mecionados no passo anteri
 Introduzir o seguinte código:
 ```
 cd <diretorio_do_repositorio>
-conda install -n dataSci --file requirements.txt
+conda create -n dataSci --file requirements.txt
 ```
 E esperar que a instalação esteja concluida
 
