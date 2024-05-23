@@ -22,7 +22,7 @@ O objetivo deste projeto é abordar um caso real do conjunto de dados, represent
 Pretende-se, portanto, desenvolver vários algoritmos SML (Supervised Machine Learning), capazes de classificar os pacientes relativamente à sua sobrevivência após 1 ano do diagnóstico (aspeto identificado na coluna `"Class"` com `"Lives"` ou `"Dies"`). <br>
 
 ## Streamlit
-Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui]((https://predictinghepatocellularcarcinomathroughsml.streamlit.app/)).
+Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui](https://predictinghepatocellularcarcinomathroughsml.streamlit.app/).
 
  ## Como opera o programa
 
