@@ -24,7 +24,7 @@ Pretende-se, portanto, desenvolver vários algoritmos SML (Supervised Machine Le
 
  ## Como opera o programa
 
-Este programa trabalha com um intrepetador `Python` e usa um ambiente virtual `conda`  de forma a facilitar a instalação das dependências necessárias para a utilização do Jupyter Notebook. O notebook mencionado está guardado no ficheiro de nome [data.ipybn](data.ipybn) que, passo a passo, mostrará a progressão do projeto, bem como o nosso processo lógico e a forma como decidimos atacar o problema. <br>
+Este programa trabalha com um intrepetador `Python` e usa um ambiente virtual `conda`  de forma a facilitar a instalação das dependências necessárias para a utilização do Jupyter Notebook. O notebook mencionado está guardado no ficheiro de nome [polirTabela.ipybn](polirTabela.ipybn) que, passo a passo, mostrará a progressão do projeto, bem como o nosso processo lógico e a forma como decidimos atacar o problema. <br>
 
 A escolha da utilização de um ambiente `conda` derivou dos seguintes fatores:
 
