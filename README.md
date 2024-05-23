@@ -80,7 +80,7 @@ Clicar `Enter`, e selecionar o interpretador de Python que tenha como nome `Pyth
 Navegar até ao diretório correto através do terminal e abrir o ficheiro `.py` ou `.ipynb` desejado:
 ```
 cd <diretorio_do_repositorio>
-data.ipynb (por exemplo)
+polirTabela.ipynb (por exemplo)
 ```
 >**Nota:** Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui](https://www.google.com).
 
