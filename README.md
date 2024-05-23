@@ -82,7 +82,7 @@ Navegar até ao diretório correto através do terminal e abrir o ficheiro `.py`
 cd <diretorio_do_repositorio>
 data.ipynb (por exemplo)
 ```
->**Nota:** Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique <a href="google.com">aqui</a> 
+>**Nota:** Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui](https://www.google.com).
 
 ## Bibliotecas utilizadas e as suas versões
 #### As bibliotecas principais são:
