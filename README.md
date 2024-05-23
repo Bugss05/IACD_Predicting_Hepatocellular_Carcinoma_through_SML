@@ -40,6 +40,9 @@ A escolha da utilização de um ambiente `conda` derivou dos seguintes fatores:
 
 * **Leveza**: a transmissão e instalação do ambiente é facilitada com pelo ficheiro [requirements.txt](requirements.txt) sendo portanto apenas necessários menos que `30 KB` de espaço livre em disco para obter a lista detalhada com todas as bibliotecas utilizadas.
 
+## Streamlit
+Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui](https://www.google.com).
+
 ## Instalar o programa
 
 #### Pré-Requisitos
@@ -82,7 +85,6 @@ Navegar até ao diretório correto através do terminal e abrir o ficheiro `.py`
 cd <diretorio_do_repositorio>
 polirTabela.ipynb (por exemplo)
 ```
->**Nota:** Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui](https://www.google.com).
 
 ## Bibliotecas utilizadas e as suas versões
 #### As bibliotecas principais são:
