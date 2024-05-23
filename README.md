@@ -106,8 +106,8 @@ polirTabela.ipynb (por exemplo)
       <td>1.26.4</td>
     </tr>
     <tr>
-      <td>jupyter_core</td>
-      <td>5.5.0</td>
+      <td>jupyterlab</td>
+      <td>4.0.11</td>
     </tr>
     <tr>
       <td>dataprep</td>
@@ -116,6 +116,18 @@ polirTabela.ipynb (por exemplo)
     <tr>
       <td>streamlit</td>
       <td>1.32.0</td>
+    </tr>
+    <tr>
+      <td>scikit-learn</td>
+      <td>1.4.2</td>
+    </tr>
+    <tr>
+      <td>matplotkib</td>
+      <td>3.8.4</td>
+    </tr>
+    <tr>
+      <td>altair</td>
+      <td>5.0.1</td>
     </tr>
   </tbody>
 </table>
