@@ -21,6 +21,8 @@ O objetivo deste projeto é abordar um caso real do conjunto de dados, represent
 
 Pretende-se, portanto, desenvolver vários algoritmos SML (Supervised Machine Learning), capazes de classificar os pacientes relativamente à sua sobrevivência após 1 ano do diagnóstico (aspeto identificado na coluna `"Class"` com `"Lives"` ou `"Dies"`). <br>
 
+## Streamlit
+Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui]((https://predictinghepatocellularcarcinomathroughsml.streamlit.app/)).
 
  ## Como opera o programa
 
@@ -40,8 +42,7 @@ A escolha da utilização de um ambiente `conda` derivou dos seguintes fatores:
 
 * **Leveza**: a transmissão e instalação do ambiente é facilitada com pelo ficheiro [requirements.txt](requirements.txt) sendo portanto apenas necessários menos que `30 KB` de espaço livre em disco para obter a lista detalhada com todas as bibliotecas utilizadas.
 
-## Streamlit
-Para visitar o Streamlit onde está documentado todo o processo, auxiliado por gráficos relevantes ao projeto, clique [aqui](https://www.google.com).
+
 
 ## Instalar o programa
 
